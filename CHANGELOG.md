@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.1-beta.3](https://github.com/go-mondo/app-connect-node-sdk/compare/app-connect-sdk-v0.0.1-beta.2...app-connect-sdk-v0.0.1-beta.3) (2025-08-04)
+
+
+### Bug Fixes
+
+* npm publish public ([3a31a11](https://github.com/go-mondo/app-connect-node-sdk/commit/3a31a11fbded87462cf094c78822468e43e3a3aa))
+
 ## [0.0.1-beta.2](https://github.com/go-mondo/app-connect-node-sdk/compare/app-connect-sdk-v0.0.1-beta.1...app-connect-sdk-v0.0.1-beta.2) (2025-08-04)
 
 
