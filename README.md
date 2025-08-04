@@ -8,3 +8,5 @@ You can use the library in both TypeScript and JavaScript code bases.
 ## Features
 - Enforce 1-to-1, 1-to-many or many-to-many relationships
 - App agnostic
+
+test
