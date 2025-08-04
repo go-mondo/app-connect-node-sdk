@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { AppObjectHandleSchema, AppObjectSchema } from "src/objects/schema.js";
 import { AppHandleSchema, AppSchema } from "../apps/schema.js";
 import { RequiredDateSchema } from "../common/index.js";
+import { AppObjectHandleSchema, AppObjectSchema } from "../objects/schema.js";
 
 const BaseEntitySchema = z.object({
 	app: AppHandleSchema,

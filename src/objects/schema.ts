@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AppReferenceSchema } from "src/apps/schema.js";
+import { AppReferenceSchema } from "../apps/schema.js";
 import {
 	type Handle,
 	HandleSchema,

@@ -1,13 +1,13 @@
 import { z } from "zod";
-import {
-	AppObjectHandleSchema,
-	AppObjectReferenceSchema,
-} from "src/objects/schema.js";
 import { AppHandleSchema, AppReferenceSchema } from "../apps/schema.js";
 import {
 	RequiredDatePayloadSchema,
 	RequiredDateSchema,
 } from "../common/index.js";
+import {
+	AppObjectHandleSchema,
+	AppObjectReferenceSchema,
+} from "../objects/schema.js";
 
 export const JoinType = {
 	ONE: "one",
