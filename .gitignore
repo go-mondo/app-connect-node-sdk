@@ -1,0 +1,16 @@
+# Dependency directories
+node_modules
+
+# Build output
+dist
+lib
+
+# Coverage directory
+coverage
+
+# OS
+.DS_Store
+
+# TS build files
+tsconfig.tsbuildinfo
+.tsbuildinfo
