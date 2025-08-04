@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.1-beta.5](https://github.com/go-mondo/app-connect-node-sdk/compare/app-connect-sdk-v0.0.1-beta.4...app-connect-sdk-v0.0.1-beta.5) (2025-08-04)
+
+
+### Bug Fixes
+
+* use relative paths ([d48d02d](https://github.com/go-mondo/app-connect-node-sdk/commit/d48d02d0bad0c204b6f4027ee6754703490cad34))
+
 ## [0.0.1-beta.4](https://github.com/go-mondo/app-connect-node-sdk/compare/app-connect-sdk-v0.0.1-beta.3...app-connect-sdk-v0.0.1-beta.4) (2025-08-04)
 
 
