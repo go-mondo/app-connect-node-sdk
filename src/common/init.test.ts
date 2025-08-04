@@ -260,8 +260,8 @@ describe('Common - Initialization (init.ts)', () => {
       const instance = new MondoAppConnect(config);
 
       expect(instance.config.accessToken).toBe('test-access-token');
-      // arktype doesn't filter out extra properties, it passes them through
-      expect((instance.config as any).extraProperty).toBe('should-be-ignored');
+      // Zod strips unknown properties by default
+      expect((instance.config as any).extraProperty).toBeUndefined();
     });
 
     test('should validate host URL format strictly', () => {

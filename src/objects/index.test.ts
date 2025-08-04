@@ -1,4 +1,4 @@
-import { type } from 'arktype';
+import { z } from 'zod';
 import { describe, expect, test } from 'vitest';
 import * as ObjectsModule from './index.js';
 import {
@@ -38,13 +38,13 @@ describe('Objects Index Module', () => {
     });
 
     test('should export schema functions as callable functions', () => {
-      expect(typeof ObjectsModule.AppObjectSchema).toBe('function');
-      expect(typeof ObjectsModule.AppObjectPayloadSchema).toBe('function');
-      expect(typeof ObjectsModule.InsertAppObjectPayloadSchema).toBe('function');
-      expect(typeof ObjectsModule.UpdateAppObjectPayloadSchema).toBe('function');
-      expect(typeof ObjectsModule.AppObjectUrlSchema).toBe('function');
-      expect(typeof ObjectsModule.AppObjectUrlStringSchema).toBe('function');
-      expect(typeof ObjectsModule.AppObjectHandleSchema).toBe('function');
+      expect(typeof ObjectsModule.AppObjectSchema).toBe('object');
+      expect(typeof ObjectsModule.AppObjectPayloadSchema).toBe('object');
+      expect(typeof ObjectsModule.InsertAppObjectPayloadSchema).toBe('object');
+      expect(typeof ObjectsModule.UpdateAppObjectPayloadSchema).toBe('object');
+      expect(typeof ObjectsModule.AppObjectUrlSchema).toBe('object');
+      expect(typeof ObjectsModule.AppObjectUrlStringSchema).toBe('object');
+      expect(typeof ObjectsModule.AppObjectHandleSchema).toBe('object');
     });
   });
 
@@ -157,17 +157,17 @@ describe('Objects Index Module', () => {
       };
 
       // Test that we can use the exported schemas
-      const appObjectResult = ObjectsModule.AppObjectSchema(testData);
-      const payloadResult = ObjectsModule.AppObjectPayloadSchema(testData);
-      const handleResult = ObjectsModule.AppObjectHandleSchema(testData.handle);
+      const appObjectResult = ObjectsModule.AppObjectSchema.safeParse(testData);
+      const payloadResult = ObjectsModule.AppObjectPayloadSchema.safeParse(testData);
+      const handleResult = ObjectsModule.AppObjectHandleSchema.safeParse(testData.handle);
 
       // Verify results are valid (not error objects)
-      expect(appObjectResult).not.toBeInstanceOf(Error);
-      expect(payloadResult).not.toBeInstanceOf(Error);
-      expect(handleResult).not.toBeInstanceOf(Error);
+      expect(appObjectResult.success).toBe(true);
+      expect(payloadResult.success).toBe(true);
+      expect(handleResult.success).toBe(true);
 
-      // Verify the schemas work as expected
-      expect(handleResult).toBe(testData.handle);
+      // Verify the schemas work as expected  
+      if (handleResult.success) expect(handleResult.data).toBe(testData.handle);
     });
 
     test('should maintain schema behavior through module exports', () => {
@@ -181,19 +181,19 @@ describe('Objects Index Module', () => {
       };
 
       // Test insert schema
-      const insertResult = ObjectsModule.InsertAppObjectPayloadSchema(validInsertData);
-      expect(insertResult).not.toBeInstanceOf(Error);
+      const insertResult = ObjectsModule.InsertAppObjectPayloadSchema.safeParse(validInsertData);
+      expect(insertResult.success).toBe(true);
 
       // Test update schema  
-      const updateResult = ObjectsModule.UpdateAppObjectPayloadSchema(validUpdateData);
-      expect(updateResult).not.toBeInstanceOf(Error);
+      const updateResult = ObjectsModule.UpdateAppObjectPayloadSchema.safeParse(validUpdateData);
+      expect(updateResult.success).toBe(true);
 
       // Test URL schemas
-      const urlResult = ObjectsModule.AppObjectUrlSchema('https://example.com/test/{{id}}');
-      expect(urlResult).not.toBeInstanceOf(Error);
+      const urlResult = ObjectsModule.AppObjectUrlSchema.safeParse('https://example.com/test/{{id}}');
+      expect(urlResult.success).toBe(true);
 
-      const urlStringResult = ObjectsModule.AppObjectUrlStringSchema('https://example.com/test/{{id}}');
-      expect(urlStringResult).not.toBeInstanceOf(Error);
+      const urlStringResult = ObjectsModule.AppObjectUrlStringSchema.safeParse('https://example.com/test/{{id}}');
+      expect(urlStringResult.success).toBe(true);
     });
   });
 
@@ -212,10 +212,10 @@ describe('Objects Index Module', () => {
 
     test('should preserve function properties and metadata', () => {
       // Verify that functions maintain their callable nature
-      expect(typeof ObjectsModule.AppObjectSchema).toBe('function');
-      expect(typeof ObjectsModule.AppObjectPayloadSchema).toBe('function');
-      expect(typeof ObjectsModule.InsertAppObjectPayloadSchema).toBe('function');
-      expect(typeof ObjectsModule.UpdateAppObjectPayloadSchema).toBe('function');
+      expect(typeof ObjectsModule.AppObjectSchema).toBe('object');
+      expect(typeof ObjectsModule.AppObjectPayloadSchema).toBe('object');
+      expect(typeof ObjectsModule.InsertAppObjectPayloadSchema).toBe('object');
+      expect(typeof ObjectsModule.UpdateAppObjectPayloadSchema).toBe('object');
 
       // Verify functions are the same references
       expect(ObjectsModule.AppObjectSchema).toBe(AppObjectSchema);
@@ -231,30 +231,30 @@ describe('Objects Index Module', () => {
       const testUrlObject = new URL(testUrl);
 
       // Test URL to URL object conversion
-      const urlResult = ObjectsModule.AppObjectUrlSchema(testUrl);
-      expect(urlResult).not.toBeInstanceOf(Error);
-      expect(urlResult).toBeInstanceOf(URL);
+      const urlResult = ObjectsModule.AppObjectUrlSchema.safeParse(testUrl);
+      expect(urlResult.success).toBe(true);
+      expect(urlResult.data).toBeInstanceOf(URL);
 
       // Test URL object to string conversion
-      const urlStringResult = ObjectsModule.AppObjectUrlStringSchema(testUrlObject);
-      expect(urlStringResult).not.toBeInstanceOf(Error);
-      expect(typeof urlStringResult).toBe('string');
+      const urlStringResult = ObjectsModule.AppObjectUrlStringSchema.safeParse(testUrlObject);
+      expect(urlStringResult.success).toBe(true);
+      expect(typeof urlStringResult.data).toBe('string');
 
       // Test URL normalization with tokens
       const encodedUrl = 'https://example.com/object/%7B%7Bid%7D%7D';
-      const normalizedResult = ObjectsModule.AppObjectUrlStringSchema(encodedUrl);
-      expect(normalizedResult).not.toBeInstanceOf(Error);
-      expect(normalizedResult).toBe(testUrl);
+      const normalizedResult = ObjectsModule.AppObjectUrlStringSchema.safeParse(encodedUrl);
+      expect(normalizedResult.success).toBe(true);
+      expect(normalizedResult.data).toBe(testUrl);
     });
 
     test('should handle undefined URLs correctly through exports', () => {
-      const urlResult = ObjectsModule.AppObjectUrlSchema(undefined);
-      expect(urlResult).not.toBeInstanceOf(Error);
-      expect(urlResult).toBeUndefined();
+      const urlResult = ObjectsModule.AppObjectUrlSchema.safeParse(undefined);
+      expect(urlResult.success).toBe(true);
+      expect(urlResult.data).toBeUndefined();
 
-      const urlStringResult = ObjectsModule.AppObjectUrlStringSchema(undefined);
-      expect(urlStringResult).not.toBeInstanceOf(Error);
-      expect(urlStringResult).toBeUndefined();
+      const urlStringResult = ObjectsModule.AppObjectUrlStringSchema.safeParse(undefined);
+      expect(urlStringResult.success).toBe(true);
+      expect(urlStringResult.data).toBeUndefined();
     });
   });
 
@@ -268,8 +268,8 @@ describe('Objects Index Module', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      const result = ObjectsModule.AppObjectSchema(validAppObjectData);
-      expect(result).not.toBeInstanceOf(Error);
+      const result = ObjectsModule.AppObjectSchema.safeParse(validAppObjectData);
+      expect(result.success).toBe(true);
 
       const invalidAppObjectData = {
         handle: 'test-object',
@@ -279,8 +279,8 @@ describe('Objects Index Module', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      const invalidResult = ObjectsModule.AppObjectSchema(invalidAppObjectData);
-      expect(invalidResult).toBeInstanceOf(type.errors);
+      const invalidResult = ObjectsModule.AppObjectSchema.safeParse(invalidAppObjectData);
+      expect(invalidResult.success).toBe(false);
     });
   });
 
@@ -303,8 +303,8 @@ describe('Objects Index Module', () => {
       ];
 
       for (const schema of schemas) {
-        const result = schema(testObjectData);
-        expect(result).not.toBeInstanceOf(Error);
+        const result = schema.safeParse(testObjectData);
+        expect(result.success).toBe(true);
       }
 
       // Test partial schemas work
@@ -314,15 +314,15 @@ describe('Objects Index Module', () => {
         url: 'https://example.com/insert/{{id}}',
       };
 
-      const insertResult = ObjectsModule.InsertAppObjectPayloadSchema(insertData);
-      expect(insertResult).not.toBeInstanceOf(Error);
+      const insertResult = ObjectsModule.InsertAppObjectPayloadSchema.safeParse(insertData);
+      expect(insertResult.success).toBe(true);
 
       const updateData = {
         name: 'Updated Integration Test',
       };
 
-      const updateResult = ObjectsModule.UpdateAppObjectPayloadSchema(updateData);
-      expect(updateResult).not.toBeInstanceOf(Error);
+      const updateResult = ObjectsModule.UpdateAppObjectPayloadSchema.safeParse(updateData);
+      expect(updateResult.success).toBe(true);
     });
   });
 });

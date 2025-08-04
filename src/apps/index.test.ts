@@ -36,14 +36,18 @@ describe('Apps Index Module', () => {
       expect(AppsModule.AppHandleSchema).toBe(AppHandleSchema);
     });
 
-    test('should export schema functions as callable functions', () => {
-      expect(typeof AppsModule.AppSchema).toBe('function');
-      expect(typeof AppsModule.AppPayloadSchema).toBe('function');
-      expect(typeof AppsModule.InsertAppPayloadSchema).toBe('function');
-      expect(typeof AppsModule.UpdateAppPayloadSchema).toBe('function');
-      expect(typeof AppsModule.AppAvatarUrlSchema).toBe('function');
-      expect(typeof AppsModule.AppAvatarUrlStringSchema).toBe('function');
-      expect(typeof AppsModule.AppHandleSchema).toBe('function');
+    test('should export schema objects as zod schemas', () => {
+      expect(typeof AppsModule.AppSchema).toBe('object');
+      expect(typeof AppsModule.AppPayloadSchema).toBe('object');
+      expect(typeof AppsModule.InsertAppPayloadSchema).toBe('object');
+      expect(typeof AppsModule.UpdateAppPayloadSchema).toBe('object');
+      expect(typeof AppsModule.AppAvatarUrlSchema).toBe('object');
+      expect(typeof AppsModule.AppAvatarUrlStringSchema).toBe('object');
+      expect(typeof AppsModule.AppHandleSchema).toBe('object');
+      
+      // Verify they have safeParse method (zod schema property)
+      expect(typeof AppsModule.AppSchema.safeParse).toBe('function');
+      expect(typeof AppsModule.AppPayloadSchema.safeParse).toBe('function');
     });
   });
 
@@ -153,17 +157,19 @@ describe('Apps Index Module', () => {
       };
       
       // Test that we can use the exported schemas
-      const appResult = AppsModule.AppSchema(testData);
-      const payloadResult = AppsModule.AppPayloadSchema(testData);
-      const handleResult = AppsModule.AppHandleSchema(testData.handle);
+      const appResult = AppsModule.AppSchema.safeParse(testData);
+      const payloadResult = AppsModule.AppPayloadSchema.safeParse(testData);
+      const handleResult = AppsModule.AppHandleSchema.safeParse(testData.handle);
       
-      // Verify results are valid (not error objects)
-      expect(appResult).not.toBeInstanceOf(Error);
-      expect(payloadResult).not.toBeInstanceOf(Error);
-      expect(handleResult).not.toBeInstanceOf(Error);
+      // Verify results are valid (successful parses)
+      expect(appResult.success).toBe(true);
+      expect(payloadResult.success).toBe(true);
+      expect(handleResult.success).toBe(true);
       
       // Verify the schemas work as expected
-      expect(handleResult).toBe(testData.handle);
+      if (handleResult.success) {
+        expect(handleResult.data).toBe(testData.handle);
+      }
     });
 
     test('should maintain schema behavior through module exports', () => {
@@ -177,19 +183,19 @@ describe('Apps Index Module', () => {
       };
       
       // Test insert schema
-      const insertResult = AppsModule.InsertAppPayloadSchema(validInsertData);
-      expect(insertResult).not.toBeInstanceOf(Error);
+      const insertResult = AppsModule.InsertAppPayloadSchema.safeParse(validInsertData);
+      expect(insertResult.success).toBe(true);
       
       // Test update schema  
-      const updateResult = AppsModule.UpdateAppPayloadSchema(validUpdateData);
-      expect(updateResult).not.toBeInstanceOf(Error);
+      const updateResult = AppsModule.UpdateAppPayloadSchema.safeParse(validUpdateData);
+      expect(updateResult.success).toBe(true);
       
       // Test URL schemas
-      const urlResult = AppsModule.AppAvatarUrlSchema('https://example.com/test.png');
-      expect(urlResult).not.toBeInstanceOf(Error);
+      const urlResult = AppsModule.AppAvatarUrlSchema.safeParse('https://example.com/test.png');
+      expect(urlResult.success).toBe(true);
       
-      const urlStringResult = AppsModule.AppAvatarUrlStringSchema('https://example.com/test.png');
-      expect(urlStringResult).not.toBeInstanceOf(Error);
+      const urlStringResult = AppsModule.AppAvatarUrlStringSchema.safeParse('https://example.com/test.png');
+      expect(urlStringResult.success).toBe(true);
     });
   });
 
@@ -208,10 +214,10 @@ describe('Apps Index Module', () => {
 
     test('should preserve function properties and metadata', () => {
       // Verify that functions maintain their callable nature
-      expect(typeof AppsModule.AppSchema).toBe('function');
-      expect(typeof AppsModule.AppPayloadSchema).toBe('function');
-      expect(typeof AppsModule.InsertAppPayloadSchema).toBe('function');
-      expect(typeof AppsModule.UpdateAppPayloadSchema).toBe('function');
+      expect(typeof AppsModule.AppSchema).toBe('object');
+      expect(typeof AppsModule.AppPayloadSchema).toBe('object');
+      expect(typeof AppsModule.InsertAppPayloadSchema).toBe('object');
+      expect(typeof AppsModule.UpdateAppPayloadSchema).toBe('object');
       
       // Verify functions are the same references
       expect(AppsModule.AppSchema).toBe(AppSchema);

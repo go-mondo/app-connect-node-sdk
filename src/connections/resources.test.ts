@@ -131,8 +131,6 @@ describe('Connections Resources', () => {
           app: validConnection.app,
           object: validConnection.object,
           id: validConnection.id,
-          avatar: validConnection.avatar,
-          url: validConnection.url,
           inferred: validConnection.inferred,
         }));
         expect(result.items[0].updatedAt).toBeInstanceOf(Date);

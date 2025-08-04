@@ -63,7 +63,7 @@ export async function listConnectionsBySource(
 	);
 
 	return parseEgressSchema(
-		PaginationCollectionSchema(ConnectionPayloadSchema)(
+		PaginationCollectionSchema(ConnectionPayloadSchema).safeParse(
 			await getItemWithAuthorization(url, instance.authorizer),
 		),
 	);
@@ -75,13 +75,11 @@ export async function associateConnection(
 	item: UpsertConnectionInput,
 ): Promise<ConnectionPayload> {
 	return parseEgressSchema(
-		ConnectionPayloadSchema(
+		ConnectionPayloadSchema.safeParse(
 			await putItemWithAuthorization(
 				new URL(ConnectionResources.buildPath(source), instance.config.host),
 				instance.authorizer,
-				parseEgressSchema(
-					UpsertConnectionPayloadSchema.onUndeclaredKey("delete")(item),
-				),
+				parseEgressSchema(UpsertConnectionPayloadSchema.safeParse(item)),
 			),
 		),
 	);
@@ -93,13 +91,11 @@ export async function dissociateConnection(
 	item: UpsertConnectionInput,
 ): Promise<ConnectionPayload> {
 	return parseEgressSchema(
-		ConnectionPayloadSchema(
+		ConnectionPayloadSchema.safeParse(
 			await deleteItemWithAuthorization(
 				new URL(ConnectionResources.buildPath(source), instance.config.host),
 				instance.authorizer,
-				parseEgressSchema(
-					UpsertConnectionPayloadSchema.onUndeclaredKey("delete")(item),
-				),
+				parseEgressSchema(UpsertConnectionPayloadSchema.safeParse(item)),
 			),
 		),
 	);

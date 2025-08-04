@@ -1,4 +1,4 @@
-import { type } from "arktype";
+import { z } from "zod";
 import {
 	AppObjectHandleSchema,
 	AppObjectReferenceSchema,
@@ -15,8 +15,8 @@ export const JoinType = {
 } as const;
 export type AnyJoinType = (typeof JoinType)[keyof typeof JoinType];
 
-const JoinSchema = type.enumerated(JoinType.ONE, JoinType.MANY);
-const JoinPropertySchema = type({
+const JoinSchema = z.enum([JoinType.ONE, JoinType.MANY]);
+const JoinPropertySchema = z.object({
 	join: JoinSchema.default(JoinType.ONE),
 });
 
@@ -28,64 +28,65 @@ export const ConfigurationStatus = {
 export type AnyConfigurationStatus =
 	(typeof ConfigurationStatus)[keyof typeof ConfigurationStatus];
 
-const StatusSchema = type.enumerated(
+const StatusSchema = z.enum([
 	ConfigurationStatus.ENABLED,
 	ConfigurationStatus.DISABLED,
-);
-const StatusPropertySchema = type({
+]);
+const StatusPropertySchema = z.object({
 	status: StatusSchema.default(ConfigurationStatus.ENABLED),
 });
 
-const EntitySchema = JoinPropertySchema.and({
+const EntitySchema = JoinPropertySchema.extend({
 	app: AppReferenceSchema,
 	object: AppObjectReferenceSchema,
 });
 export const SourceSchema = EntitySchema;
-export type Source = typeof SourceSchema.inferOut;
+export type Source = z.output<typeof SourceSchema>;
 
 export const TargetSchema = EntitySchema;
-export type Target = typeof TargetSchema.inferOut;
+export type Target = z.output<typeof TargetSchema>;
 
-const BaseSchema = StatusPropertySchema.and({
+const BaseSchema = StatusPropertySchema.extend({
 	source: SourceSchema,
 	target: TargetSchema,
 });
 
-export const ConfigurationSchema = BaseSchema.and({
+export const ConfigurationSchema = BaseSchema.extend({
 	updatedAt: RequiredDateSchema,
 });
-export type ConfigurationProperties = typeof ConfigurationSchema.inferIn;
-export type Configuration = typeof ConfigurationSchema.inferOut;
+export type ConfigurationProperties = z.input<typeof ConfigurationSchema>;
+export type Configuration = z.output<typeof ConfigurationSchema>;
 
-export const ConfigurationPayloadSchema = BaseSchema.and({
+export const ConfigurationPayloadSchema = BaseSchema.extend({
 	updatedAt: RequiredDatePayloadSchema,
 });
-export type ConfigurationPayload = typeof ConfigurationPayloadSchema.inferOut;
+export type ConfigurationPayload = z.output<typeof ConfigurationPayloadSchema>;
 
-const EntityHandleSchema = type({
+const EntityHandleSchema = z.object({
 	app: AppHandleSchema,
 	object: AppObjectHandleSchema,
 });
-const EntityReferenceHandleSchema = type({
-	app: AppReferenceSchema.pick("handle"),
-	object: AppObjectReferenceSchema.pick("handle"),
+const EntityReferenceHandleSchema = z.object({
+	app: AppReferenceSchema.pick({ handle: true }),
+	object: AppObjectReferenceSchema.pick({ handle: true }),
 });
 
-const EntityIdentifierSchema = EntityHandleSchema.or(
-	EntityReferenceHandleSchema,
-).pipe((e, ctx) => ({
-	...e,
-	app: {
-		handle: typeof e.app === "string" ? e.app : e.app.handle,
-	},
-	object: {
-		handle: typeof e.object === "string" ? e.object : e.object.handle,
-	},
-}));
+const EntityIdentifierSchema = z
+	.union([EntityHandleSchema, EntityReferenceHandleSchema])
+	.transform((e) => ({
+		...e,
+		app: {
+			handle: typeof e.app === "string" ? e.app : e.app.handle,
+		},
+		object: {
+			handle: typeof e.object === "string" ? e.object : e.object.handle,
+		},
+	}));
 
-const UpsertEntitySchema = EntityHandleSchema.or(EntityReferenceHandleSchema)
+const UpsertEntitySchema = z
+	.union([EntityHandleSchema, EntityReferenceHandleSchema])
 	.and(JoinPropertySchema)
-	.pipe((e) => ({
+	.transform((e) => ({
 		...e,
 		app: {
 			handle: typeof e.app === "string" ? e.app : e.app.handle,
@@ -96,21 +97,25 @@ const UpsertEntitySchema = EntityHandleSchema.or(EntityReferenceHandleSchema)
 		join: e.join,
 	}));
 
-export const UpsertConfigurationPayloadSchema = StatusPropertySchema.and({
+export const UpsertConfigurationPayloadSchema = StatusPropertySchema.extend({
 	source: UpsertEntitySchema,
 	target: UpsertEntitySchema,
 });
-export type UpsertConfigurationInput =
-	typeof UpsertConfigurationPayloadSchema.inferIn;
-export type UpsertConfigurationPayload =
-	typeof UpsertConfigurationPayloadSchema.inferOut;
+export type UpsertConfigurationInput = z.input<
+	typeof UpsertConfigurationPayloadSchema
+>;
+export type UpsertConfigurationPayload = z.output<
+	typeof UpsertConfigurationPayloadSchema
+>;
 
-export const ConfigurationIdentifiersSchema = type({
+export const ConfigurationIdentifiersSchema = z.object({
 	source: EntityIdentifierSchema,
 	target: EntityIdentifierSchema,
 });
-export type ConfigurationIdentifiersInput =
-	typeof ConfigurationIdentifiersSchema.inferIn;
-export type ConfigurationIdentifiers =
-	typeof ConfigurationIdentifiersSchema.inferOut;
+export type ConfigurationIdentifiersInput = z.input<
+	typeof ConfigurationIdentifiersSchema
+>;
+export type ConfigurationIdentifiers = z.output<
+	typeof ConfigurationIdentifiersSchema
+>;
 export type ConfigurationIdentifiersPayload = ConfigurationIdentifiers;

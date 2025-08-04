@@ -1,4 +1,4 @@
-import { type } from "arktype";
+import type { z } from "zod";
 import { HttpError } from "../errors/http.js";
 import { ValidationError } from "../errors/validation.js";
 import type { Pagination } from "../schema/pagination.js";
@@ -6,29 +6,30 @@ import type { Pagination } from "../schema/pagination.js";
 /**
  * Parse schema data that is calling the API
  */
-export function parseEgressSchema<S>(output: S | type.errors): S {
-	if (output instanceof type.errors) {
-		console.warn(`Failed to parse egress payload: ${output.summary}`, {
-			error: output,
+export function parseEgressSchema<S>(output: z.ZodSafeParseResult<S>): S {
+	if (!output.success) {
+		console.warn(`Failed to parse egress payload: ${output.error.message}`, {
+			error: output.error,
 		});
 
-		throw output;
+		throw output.error;
 	}
 
-	return output;
+	return output.data;
 }
 
 /**
  * Parse schema data that is returning from the API
  */
-export function parseIngressSchema<S>(output: S | type.errors): S {
-	if (output instanceof type.errors) {
-		console.warn(`Failed to parse ingress payload: ${output.summary}`, {
-			error: output,
+export function parseIngressSchema<S>(output: z.ZodSafeParseResult<S>): S {
+	if (!output.success) {
+		console.warn(`Failed to parse ingress payload: ${output.error.message}`, {
+			error: output.error,
 		});
+		throw output.error;
 	}
 
-	return output as S;
+	return output.data;
 }
 
 export function defaultRequestHeaders(): Headers {

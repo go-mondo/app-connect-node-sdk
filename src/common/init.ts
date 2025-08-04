@@ -1,19 +1,21 @@
-import { type } from "arktype";
+import { z } from "zod";
 
-const BaseConfigSchema = type({
-	host: type("string.url.parse").default(
-		"https://dxnh0yagb1.execute-api.us-east-1.amazonaws.com", // Todo - Replace me!
-	),
+const BaseConfigSchema = z.object({
+	host: z
+		.string()
+		.url()
+		.default("https://dxnh0yagb1.execute-api.us-east-1.amazonaws.com") // Todo - Replace me!
+		.transform((url) => new URL(url)),
 });
 
-const AccessTokenConfigSchema = BaseConfigSchema.and({
-	accessToken: type("string").moreThanLength(0),
+const AccessTokenConfigSchema = BaseConfigSchema.extend({
+	accessToken: z.string().min(1),
 });
 
 const ConfigSchema = AccessTokenConfigSchema;
 
-export type ConfigProps = typeof ConfigSchema.inferIn;
-export type Config = typeof ConfigSchema.inferOut;
+export type ConfigProps = z.input<typeof ConfigSchema>;
+export type Config = z.output<typeof ConfigSchema>;
 
 export class MondoAppConnect {
 	readonly config: Config;
@@ -39,11 +41,12 @@ export class MondoAppConnect {
 }
 
 function initConfig(config: ConfigProps): Config {
-	const out = ConfigSchema(config);
-
-	if (out instanceof type.errors) {
-		throw new Error(`Invalid configuration: ${out.summary}`);
+	try {
+		return ConfigSchema.parse(config);
+	} catch (error) {
+		if (error instanceof z.ZodError) {
+			throw new Error(`Invalid configuration: ${error.message}`);
+		}
+		throw error;
 	}
-
-	return out;
 }

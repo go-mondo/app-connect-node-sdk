@@ -1,4 +1,4 @@
-import { type } from 'arktype';
+import { z } from 'zod';
 import { describe, expect, test } from 'vitest';
 import * as ConnectionsModule from './index.js';
 import {
@@ -37,10 +37,10 @@ describe('Connections Index Module', () => {
     });
 
     test('should export schema functions as callable functions', () => {
-      expect(typeof ConnectionsModule.ConnectionPayloadSchema).toBe('function');
-      expect(typeof ConnectionsModule.SourceSchema).toBe('function');
-      expect(typeof ConnectionsModule.TargetSchema).toBe('function');
-      expect(typeof ConnectionsModule.UpsertConnectionPayloadSchema).toBe('function');
+      expect(typeof ConnectionsModule.ConnectionPayloadSchema).toBe('object');
+      expect(typeof ConnectionsModule.SourceSchema).toBe('object');
+      expect(typeof ConnectionsModule.TargetSchema).toBe('object');
+      expect(typeof ConnectionsModule.UpsertConnectionPayloadSchema).toBe('object');
     });
   });
 
@@ -237,22 +237,22 @@ describe('Connections Index Module', () => {
       };
       
       // Test that we can use the exported schemas
-      const sourceResult = ConnectionsModule.SourceSchema(sourceData);
-      const targetResult = ConnectionsModule.TargetSchema(sourceData);
-      const connectionResult = ConnectionsModule.ConnectionPayloadSchema(connectionData);
-      const upsertResult = ConnectionsModule.UpsertConnectionPayloadSchema(sourceData);
+      const sourceResult = ConnectionsModule.SourceSchema.safeParse(sourceData);
+      const targetResult = ConnectionsModule.TargetSchema.safeParse(sourceData);
+      const connectionResult = ConnectionsModule.ConnectionPayloadSchema.safeParse(connectionData);
+      const upsertResult = ConnectionsModule.UpsertConnectionPayloadSchema.safeParse(sourceData);
       
       // Verify results are valid (not error objects)
-      expect(sourceResult).not.toBeInstanceOf(type.errors);
-      expect(targetResult).not.toBeInstanceOf(type.errors);
-      expect(connectionResult).not.toBeInstanceOf(type.errors);
-      expect(upsertResult).not.toBeInstanceOf(type.errors);
+      expect(sourceResult.success).toBe(true);
+      expect(targetResult.success).toBe(true);
+      expect(connectionResult.success).toBe(true);
+      expect(upsertResult.success).toBe(true);
       
       // Verify the schemas work as expected
-      expect(sourceResult).toEqual(sourceData);
-      expect(targetResult).toEqual(sourceData);
+      expect(sourceResult.data).toEqual(sourceData);
+      expect(targetResult.data).toEqual(sourceData);
       // UpsertConnectionPayloadSchema transforms the data
-      expect(upsertResult).toEqual({
+      expect(upsertResult.data).toEqual({
         app: { handle: sourceData.app },
         object: { handle: sourceData.object },
         id: sourceData.id,
@@ -274,19 +274,19 @@ describe('Connections Index Module', () => {
       };
       
       // Test source schema
-      const sourceResult = ConnectionsModule.SourceSchema(validEntityData);
+      const sourceResult = ConnectionsModule.SourceSchema.safeParse(validEntityData);
       expect(sourceResult).not.toBeInstanceOf(Error);
       
       // Test target schema
-      const targetResult = ConnectionsModule.TargetSchema(validEntityData);
+      const targetResult = ConnectionsModule.TargetSchema.safeParse(validEntityData);
       expect(targetResult).not.toBeInstanceOf(Error);
       
       // Test connection payload schema
-      const connectionResult = ConnectionsModule.ConnectionPayloadSchema(validConnectionData);
+      const connectionResult = ConnectionsModule.ConnectionPayloadSchema.safeParse(validConnectionData);
       expect(connectionResult).not.toBeInstanceOf(Error);
       
       // Test upsert payload schema
-      const upsertResult = ConnectionsModule.UpsertConnectionPayloadSchema(validEntityData);
+      const upsertResult = ConnectionsModule.UpsertConnectionPayloadSchema.safeParse(validEntityData);
       expect(upsertResult).not.toBeInstanceOf(Error);
     });
 
@@ -306,11 +306,11 @@ describe('Connections Index Module', () => {
       };
       
       // Test minimal data (optional fields omitted)
-      const minimalResult = ConnectionsModule.ConnectionPayloadSchema(minimalConnectionData);
+      const minimalResult = ConnectionsModule.ConnectionPayloadSchema.safeParse(minimalConnectionData);
       expect(minimalResult).not.toBeInstanceOf(Error);
       
       // Test full data (optional fields included)
-      const fullResult = ConnectionsModule.ConnectionPayloadSchema(fullConnectionData);
+      const fullResult = ConnectionsModule.ConnectionPayloadSchema.safeParse(fullConnectionData);
       expect(fullResult).not.toBeInstanceOf(Error);
     });
   });

@@ -86,7 +86,8 @@ describe('Common - Index Module (index.ts)', () => {
       expect(typeof parseEgressSchema).toBe('function');
       
       const testData = { test: 'data' };
-      const result = parseEgressSchema(testData);
+      const safeParse = { success: true as const, data: testData };
+      const result = parseEgressSchema(safeParse);
       
       expect(result).toEqual(testData);
     });
@@ -95,7 +96,8 @@ describe('Common - Index Module (index.ts)', () => {
       expect(typeof parseIngressSchema).toBe('function');
       
       const testData = { test: 'data' };
-      const result = parseIngressSchema(testData);
+      const safeParse = { success: true as const, data: testData };
+      const result = parseIngressSchema(safeParse);
       
       expect(result).toEqual(testData);
     });
@@ -112,7 +114,7 @@ describe('Common - Index Module (index.ts)', () => {
   describe('schema exports', () => {
     test('should export HandleSchema', () => {
       expect(HandleSchema).toBeDefined();
-      expect(typeof HandleSchema).toBe('function');
+      expect(typeof HandleSchema).toBe('object');
     });
 
     test('should export normalizeUrlWithTokens function', () => {
@@ -137,14 +139,14 @@ describe('Common - Index Module (index.ts)', () => {
 
     test('should export date schemas', () => {
       expect(RequiredDateSchema).toBeDefined();
-      expect(typeof RequiredDateSchema).toBe('function');
+      expect(typeof RequiredDateSchema).toBe('object');
       expect(OptionalDateSchema).toBeDefined();
-      expect(typeof OptionalDateSchema).toBe('function');
+      expect(typeof OptionalDateSchema).toBe('object');
     });
 
     test('should export PaginationSchema', () => {
       expect(PaginationSchema).toBeDefined();
-      expect(typeof PaginationSchema).toBe('function');
+      expect(typeof PaginationSchema).toBe('object');
     });
   });
 

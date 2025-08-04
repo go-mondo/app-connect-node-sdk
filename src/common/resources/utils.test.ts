@@ -1,4 +1,4 @@
-import { type } from 'arktype';
+import { z } from 'zod';
 import { describe, expect, test, vi } from 'vitest';
 import { HttpError } from '../errors/http.js';
 import { ValidationError } from '../errors/validation.js';
@@ -17,13 +17,14 @@ describe('Common Resources - Utils', () => {
   describe('parseEgressSchema', () => {
     test('should return data when schema validation passes', () => {
       const validData = { name: 'test', value: 123 };
-      const result = parseEgressSchema(validData);
+      const safeParse = { success: true as const, data: validData };
+      const result = parseEgressSchema(safeParse);
       expect(result).toBe(validData);
     });
 
     test('should throw error when schema validation fails', () => {
-      const testSchema = type('string');
-      const mockError = testSchema(123);
+      const testSchema = z.string();
+      const mockError = testSchema.safeParse(123);
 
       expect(() => parseEgressSchema(mockError)).toThrow();
     });
@@ -32,16 +33,16 @@ describe('Common Resources - Utils', () => {
   describe('parseIngressSchema', () => {
     test('should return data when schema validation passes', () => {
       const validData = { name: 'test', value: 123 };
-      const result = parseIngressSchema(validData);
+      const safeParse = { success: true as const, data: validData };
+      const result = parseIngressSchema(safeParse);
       expect(result).toBe(validData);
     });
 
-    test('should return data as-is when schema validation fails (ingress is more lenient)', () => {
-      const testSchema = type('string');
-      const mockError = testSchema(123);
+    test('should throw when schema validation fails', () => {
+      const testSchema = z.string();
+      const mockError = testSchema.safeParse(123);
 
-      const result = parseIngressSchema(mockError);
-      expect(result).toBe(mockError);
+      expect(() => parseIngressSchema(mockError)).toThrow();
     });
   });
 

@@ -1,4 +1,4 @@
-import { type } from 'arktype';
+import { z } from 'zod';
 import { describe, expect, test } from 'vitest';
 import { TestDataFactory } from '../common/test-utils.js';
 import {
@@ -17,13 +17,13 @@ describe('Connections Schema Validation', () => {
         id: 'test-id-123',
       };
 
-      const result = SourceSchema(validSource);
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      const result = SourceSchema.safeParse(validSource);
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.app).toBe(validSource.app);
-      expect(result.object).toBe(validSource.object);
-      expect(result.id).toBe(validSource.id);
+      expect(result.data.app).toBe(validSource.app);
+      expect(result.data.object).toBe(validSource.object);
+      expect(result.data.id).toBe(validSource.id);
     });
 
     test('should validate source with various valid handle formats', () => {
@@ -42,10 +42,10 @@ describe('Connections Schema Validation', () => {
           id: 'test-id',
         };
 
-        const result = SourceSchema(source);
-        expect(result).not.toBeInstanceOf(type.errors);
-        if (result instanceof type.errors) continue;
-        expect(result.app).toBe(handle);
+        const result = SourceSchema.safeParse(source);
+        expect(result.success).toBe(true);
+        if (!result.success) continue;
+        expect(result.data.app).toBe(handle);
       }
     });
 
@@ -58,8 +58,8 @@ describe('Connections Schema Validation', () => {
       ];
 
       for (const invalidSource of invalidSources) {
-        const result = SourceSchema(invalidSource);
-        expect(result).toBeInstanceOf(type.errors);
+        const result = SourceSchema.safeParse(invalidSource);
+        expect(result.success).toBe(false);
       }
     });
 
@@ -81,8 +81,8 @@ describe('Connections Schema Validation', () => {
           id: 'test-id',
         };
 
-        const result = SourceSchema(source);
-        expect(result).toBeInstanceOf(type.errors);
+        const result = SourceSchema.safeParse(source);
+        expect(result.success).toBe(false);
       }
     });
 
@@ -101,8 +101,8 @@ describe('Connections Schema Validation', () => {
           id: 'test-id',
         };
 
-        const result = SourceSchema(source);
-        expect(result).toBeInstanceOf(type.errors);
+        const result = SourceSchema.safeParse(source);
+        expect(result.success).toBe(false);
       }
     });
 
@@ -113,13 +113,13 @@ describe('Connections Schema Validation', () => {
         id: '', // Empty string should be rejected
       };
 
-      const result = SourceSchema(source);
+      const result = SourceSchema.safeParse(source);
       // Note: arktype string schema might accept empty strings, 
       // but we test the actual behavior
-      if (result instanceof type.errors) {
-        expect(result).toBeInstanceOf(type.errors);
+      if (!result.success) {
+        expect(result.success).toBe(false);
       } else {
-        expect(result.id).toBe('');
+        expect(result.data.id).toBe('');
       }
     });
   });
@@ -132,13 +132,13 @@ describe('Connections Schema Validation', () => {
         id: 'target-id-456',
       };
 
-      const result = TargetSchema(validTarget);
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      const result = TargetSchema.safeParse(validTarget);
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.app).toBe(validTarget.app);
-      expect(result.object).toBe(validTarget.object);
-      expect(result.id).toBe(validTarget.id);
+      expect(result.data.app).toBe(validTarget.app);
+      expect(result.data.object).toBe(validTarget.object);
+      expect(result.data.id).toBe(validTarget.id);
     });
 
     test('should validate target with complex id values', () => {
@@ -159,10 +159,10 @@ describe('Connections Schema Validation', () => {
           id,
         };
 
-        const result = TargetSchema(target);
-        expect(result).not.toBeInstanceOf(type.errors);
-        if (result instanceof type.errors) continue;
-        expect(result.id).toBe(id);
+        const result = TargetSchema.safeParse(target);
+        expect(result.success).toBe(true);
+        if (!result.success) continue;
+        expect(result.data.id).toBe(id);
       }
     });
 
@@ -174,8 +174,8 @@ describe('Connections Schema Validation', () => {
       ];
 
       for (const invalidTarget of invalidTargets) {
-        const result = TargetSchema(invalidTarget);
-        expect(result).toBeInstanceOf(type.errors);
+        const result = TargetSchema.safeParse(invalidTarget);
+        expect(result.success).toBe(false);
       }
     });
 
@@ -186,13 +186,13 @@ describe('Connections Schema Validation', () => {
         id: 'test-id',
       };
 
-      const sourceResult = SourceSchema(entityData);
-      const targetResult = TargetSchema(entityData);
+      const sourceResult = SourceSchema.safeParse(entityData);
+      const targetResult = TargetSchema.safeParse(entityData);
 
-      expect(sourceResult).not.toBeInstanceOf(type.errors);
-      expect(targetResult).not.toBeInstanceOf(type.errors);
+      expect(sourceResult.success).toBe(true);
+      expect(targetResult.success).toBe(true);
       
-      if (sourceResult instanceof type.errors || targetResult instanceof type.errors) return;
+      if (!sourceResult.success || !targetResult.success) return;
       
       expect(sourceResult).toEqual(targetResult);
     });
@@ -201,17 +201,17 @@ describe('Connections Schema Validation', () => {
   describe('ConnectionPayloadSchema', () => {
     test('should validate complete valid connection payload', () => {
       const validConnection = TestDataFactory.validConnection();
-      const result = ConnectionPayloadSchema(validConnection);
+      const result = ConnectionPayloadSchema.safeParse(validConnection);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.app).toEqual(validConnection.app);
-      expect(result.object).toEqual(validConnection.object);
-      expect(result.id).toBe(validConnection.id);
-      expect(result.updatedAt).toBeInstanceOf(Date);
-      expect(result.updatedAt.toISOString()).toBe(validConnection.updatedAt);
-      expect(result.inferred).toBe(validConnection.inferred);
+      expect(result.data.app).toEqual(validConnection.app);
+      expect(result.data.object).toEqual(validConnection.object);
+      expect(result.data.id).toBe(validConnection.id);
+      expect(result.data.updatedAt).toBeInstanceOf(Date);
+      expect(result.data.updatedAt.toISOString()).toBe(validConnection.updatedAt);
+      expect(result.data.inferred).toBe(validConnection.inferred);
     });
 
     test('should validate connection payload with only required fields', () => {
@@ -228,17 +228,17 @@ describe('Connections Schema Validation', () => {
         updatedAt: '2024-01-01T00:00:00.000Z',
       };
       
-      const result = ConnectionPayloadSchema(minimalConnection);
+      const result = ConnectionPayloadSchema.safeParse(minimalConnection);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.app).toEqual(minimalConnection.app);
-      expect(result.object).toEqual(minimalConnection.object);
-      expect(result.id).toBe(minimalConnection.id);
-      expect(result.updatedAt).toBeInstanceOf(Date);
-      expect(result.updatedAt.toISOString()).toBe(minimalConnection.updatedAt);
-      expect(result.inferred).toBeUndefined();
+      expect(result.data.app).toEqual(minimalConnection.app);
+      expect(result.data.object).toEqual(minimalConnection.object);
+      expect(result.data.id).toBe(minimalConnection.id);
+      expect(result.data.updatedAt).toBeInstanceOf(Date);
+      expect(result.data.updatedAt.toISOString()).toBe(minimalConnection.updatedAt);
+      expect(result.data.inferred).toBeUndefined();
     });
 
     test('should handle optional inferred boolean field', () => {
@@ -263,12 +263,12 @@ describe('Connections Schema Validation', () => {
           ...(testCase.inferred !== undefined && { inferred: testCase.inferred }),
         };
         
-        const result = ConnectionPayloadSchema(connection);
+        const result = ConnectionPayloadSchema.safeParse(connection);
         
-        expect(result).not.toBeInstanceOf(type.errors);
-        if (result instanceof type.errors) continue;
+        expect(result.success).toBe(true);
+        if (!result.success) continue;
         
-        expect(result.inferred).toBe(testCase.expected);
+        expect(result.data.inferred).toBe(testCase.expected);
       }
     });
 
@@ -286,13 +286,13 @@ describe('Connections Schema Validation', () => {
         updatedAt: new Date('2024-01-01T00:00:00.000Z'),
       };
       
-      const result = ConnectionPayloadSchema(connectionWithDateObject);
+      const result = ConnectionPayloadSchema.safeParse(connectionWithDateObject);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.updatedAt).toBeInstanceOf(Date);
-      expect(result.updatedAt.toISOString()).toBe('2024-01-01T00:00:00.000Z');
+      expect(result.data.updatedAt).toBeInstanceOf(Date);
+      expect(result.data.updatedAt.toISOString()).toBe('2024-01-01T00:00:00.000Z');
     });
 
     test('should reject connection payload with missing required fields', () => {
@@ -304,8 +304,8 @@ describe('Connections Schema Validation', () => {
       ];
 
       for (const invalidConnection of invalidConnections) {
-        const result = ConnectionPayloadSchema(invalidConnection);
-        expect(result).toBeInstanceOf(type.errors);
+        const result = ConnectionPayloadSchema.safeParse(invalidConnection);
+        expect(result.success).toBe(false);
       }
     });
 
@@ -318,8 +318,8 @@ describe('Connections Schema Validation', () => {
         updatedAt: '2024-01-01T00:00:00.000Z',
       };
       
-      const result = ConnectionPayloadSchema(connectionWithInvalidAvatar);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = ConnectionPayloadSchema.safeParse(connectionWithInvalidAvatar);
+      expect(result.success).toBe(false);
     });
 
     test('should reject connection payload with invalid url format', () => {
@@ -331,8 +331,8 @@ describe('Connections Schema Validation', () => {
         updatedAt: '2024-01-01T00:00:00.000Z',
       };
       
-      const result = ConnectionPayloadSchema(connectionWithInvalidUrl);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = ConnectionPayloadSchema.safeParse(connectionWithInvalidUrl);
+      expect(result.success).toBe(false);
     });
 
     test('should reject connection payload with invalid inferred value', () => {
@@ -344,8 +344,8 @@ describe('Connections Schema Validation', () => {
         updatedAt: '2024-01-01T00:00:00.000Z',
       };
       
-      const result = ConnectionPayloadSchema(connectionWithInvalidInferred);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = ConnectionPayloadSchema.safeParse(connectionWithInvalidInferred);
+      expect(result.success).toBe(false);
     });
 
     test('should reject connection payload with invalid date format', () => {
@@ -356,22 +356,22 @@ describe('Connections Schema Validation', () => {
         updatedAt: 'invalid-date-format',
       };
       
-      const result = ConnectionPayloadSchema(connectionWithInvalidDate);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = ConnectionPayloadSchema.safeParse(connectionWithInvalidDate);
+      expect(result.success).toBe(false);
     });
   });
 
   describe('UpsertConnectionPayloadSchema', () => {
     test('should validate complete valid upsert connection payload', () => {
       const validUpsertPayload = TestDataFactory.validUpsertConnectionPayload();
-      const result = UpsertConnectionPayloadSchema(validUpsertPayload);
+      const result = UpsertConnectionPayloadSchema.safeParse(validUpsertPayload);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.app).toEqual({ handle: validUpsertPayload.app });
-      expect(result.object).toEqual({ handle: validUpsertPayload.object });
-      expect(result.id).toBe(validUpsertPayload.id);
+      expect(result.data.app).toEqual({ handle: validUpsertPayload.app });
+      expect(result.data.object).toEqual({ handle: validUpsertPayload.object });
+      expect(result.data.id).toBe(validUpsertPayload.id);
     });
 
     test('should validate upsert payload with various id formats', () => {
@@ -392,12 +392,12 @@ describe('Connections Schema Validation', () => {
           id,
         };
         
-        const result = UpsertConnectionPayloadSchema(upsertPayload);
+        const result = UpsertConnectionPayloadSchema.safeParse(upsertPayload);
         
-        expect(result).not.toBeInstanceOf(type.errors);
-        if (result instanceof type.errors) continue;
+        expect(result.success).toBe(true);
+        if (!result.success) continue;
         
-        expect(result.id).toBe(id);
+        expect(result.data.id).toBe(id);
       }
     });
 
@@ -410,8 +410,8 @@ describe('Connections Schema Validation', () => {
       ];
 
       for (const invalidPayload of invalidUpsertPayloads) {
-        const result = UpsertConnectionPayloadSchema(invalidPayload);
-        expect(result).toBeInstanceOf(type.errors);
+        const result = UpsertConnectionPayloadSchema.safeParse(invalidPayload);
+        expect(result.success).toBe(false);
       }
     });
 
@@ -422,8 +422,8 @@ describe('Connections Schema Validation', () => {
         id: 'test-id',
       };
       
-      const result = UpsertConnectionPayloadSchema(upsertPayloadWithInvalidApp);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = UpsertConnectionPayloadSchema.safeParse(upsertPayloadWithInvalidApp);
+      expect(result.success).toBe(false);
     });
 
     test('should reject upsert payload with invalid object handle', () => {
@@ -433,8 +433,8 @@ describe('Connections Schema Validation', () => {
         id: 'test-id',
       };
       
-      const result = UpsertConnectionPayloadSchema(upsertPayloadWithInvalidObject);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = UpsertConnectionPayloadSchema.safeParse(upsertPayloadWithInvalidObject);
+      expect(result.success).toBe(false);
     });
 
     test('should transform input data while TargetSchema keeps original structure', () => {
@@ -444,23 +444,23 @@ describe('Connections Schema Validation', () => {
         id: 'test-id',
       };
 
-      const upsertResult = UpsertConnectionPayloadSchema(entityData);
-      const targetResult = TargetSchema(entityData);
+      const upsertResult = UpsertConnectionPayloadSchema.safeParse(entityData);
+      const targetResult = TargetSchema.safeParse(entityData);
 
-      expect(upsertResult).not.toBeInstanceOf(type.errors);
-      expect(targetResult).not.toBeInstanceOf(type.errors);
+      expect(upsertResult.success).toBe(true);
+      expect(targetResult.success).toBe(true);
       
-      if (upsertResult instanceof type.errors || targetResult instanceof type.errors) return;
+      if (!upsertResult.success || !targetResult.success) return;
       
       // UpsertConnectionPayloadSchema transforms data into object format
-      expect(upsertResult).toEqual({
+      expect(upsertResult.data).toEqual({
         app: { handle: 'test-app' },
         object: { handle: 'test-object' },
         id: 'test-id',
       });
       
       // TargetSchema keeps original format
-      expect(targetResult).toEqual(entityData);
+      expect(targetResult.data).toEqual(entityData);
     });
   });
 
@@ -480,20 +480,20 @@ describe('Connections Schema Validation', () => {
         inferred: true,
       };
       
-      const result = ConnectionPayloadSchema(connectionWithNestedValidation);
+      const result = ConnectionPayloadSchema.safeParse(connectionWithNestedValidation);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
       // Verify that the entity part (app, object, id) is properly validated
-      expect(result.app).toEqual(connectionWithNestedValidation.app);
-      expect(result.object).toEqual(connectionWithNestedValidation.object);
-      expect(result.id).toBe(connectionWithNestedValidation.id);
+      expect(result.data.app).toEqual(connectionWithNestedValidation.app);
+      expect(result.data.object).toEqual(connectionWithNestedValidation.object);
+      expect(result.data.id).toBe(connectionWithNestedValidation.id);
       
       // Verify that additional fields are also present
-      expect(result.updatedAt).toBeInstanceOf(Date);
-      expect(result.updatedAt.toISOString()).toBe(connectionWithNestedValidation.updatedAt);
-      expect(result.inferred).toBe(connectionWithNestedValidation.inferred);
+      expect(result.data.updatedAt).toBeInstanceOf(Date);
+      expect(result.data.updatedAt.toISOString()).toBe(connectionWithNestedValidation.updatedAt);
+      expect(result.data.inferred).toBe(connectionWithNestedValidation.inferred);
     });
 
     test('should enforce entity validation rules in all schemas', () => {
@@ -504,13 +504,13 @@ describe('Connections Schema Validation', () => {
       };
 
       // All schemas should reject invalid entity data
-      const sourceResult = SourceSchema(invalidEntityData);
-      const targetResult = TargetSchema(invalidEntityData);
-      const upsertResult = UpsertConnectionPayloadSchema(invalidEntityData);
+      const sourceResult = SourceSchema.safeParse(invalidEntityData);
+      const targetResult = TargetSchema.safeParse(invalidEntityData);
+      const upsertResult = UpsertConnectionPayloadSchema.safeParse(invalidEntityData);
       
-      expect(sourceResult).toBeInstanceOf(type.errors);
-      expect(targetResult).toBeInstanceOf(type.errors);
-      expect(upsertResult).toBeInstanceOf(type.errors);
+      expect(sourceResult.success).toBe(false);
+      expect(targetResult.success).toBe(false);
+      expect(upsertResult.success).toBe(false);
       
       // Connection payload should also reject it
       const connectionPayload = {
@@ -518,8 +518,8 @@ describe('Connections Schema Validation', () => {
         updatedAt: '2024-01-01T00:00:00.000Z',
       };
       
-      const connectionResult = ConnectionPayloadSchema(connectionPayload);
-      expect(connectionResult).toBeInstanceOf(type.errors);
+      const connectionResult = ConnectionPayloadSchema.safeParse(connectionPayload);
+      expect(connectionResult.success).toBe(false);
     });
 
     test('should handle different transformation behaviors across entity-based schemas', () => {
@@ -529,24 +529,24 @@ describe('Connections Schema Validation', () => {
         id: 'consistent-id',
       };
 
-      const sourceResult = SourceSchema(validEntityData);
-      const targetResult = TargetSchema(validEntityData);
-      const upsertResult = UpsertConnectionPayloadSchema(validEntityData);
+      const sourceResult = SourceSchema.safeParse(validEntityData);
+      const targetResult = TargetSchema.safeParse(validEntityData);
+      const upsertResult = UpsertConnectionPayloadSchema.safeParse(validEntityData);
 
-      expect(sourceResult).not.toBeInstanceOf(type.errors);
-      expect(targetResult).not.toBeInstanceOf(type.errors);
-      expect(upsertResult).not.toBeInstanceOf(type.errors);
+      expect(sourceResult.success).toBe(true);
+      expect(targetResult.success).toBe(true);
+      expect(upsertResult.success).toBe(true);
       
-      if (sourceResult instanceof type.errors || 
-          targetResult instanceof type.errors || 
-          upsertResult instanceof type.errors) return;
+      if (!sourceResult.success || 
+          !targetResult.success || 
+          !upsertResult.success) return;
       
       // SourceSchema and TargetSchema should produce identical results
-      expect(sourceResult).toEqual(targetResult);
-      expect(sourceResult).toEqual(validEntityData);
+      expect(sourceResult.data).toEqual(targetResult.data);
+      expect(sourceResult.data).toEqual(validEntityData);
       
       // UpsertConnectionPayloadSchema transforms the data
-      expect(upsertResult).toEqual({
+      expect(upsertResult.data).toEqual({
         app: { handle: 'consistent-app' },
         object: { handle: 'consistent-object' },
         id: 'consistent-id',
@@ -562,15 +562,15 @@ describe('Connections Schema Validation', () => {
         id: 'test-id',
       };
       
-      const result = SourceSchema(validSource);
+      const result = SourceSchema.safeParse(validSource);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
       // TypeScript type checking - these should not cause compilation errors
-      const app: string = result.app;
-      const object: string = result.object;
-      const id: string = result.id;
+      const app: string = result.data.app;
+      const object: string = result.data.object;
+      const id: string = result.data.id;
       
       expect(typeof app).toBe('string');
       expect(typeof object).toBe('string');
@@ -579,17 +579,17 @@ describe('Connections Schema Validation', () => {
 
     test('should properly infer types for ConnectionPayloadSchema', () => {
       const validConnection = TestDataFactory.validConnection();
-      const result = ConnectionPayloadSchema(validConnection);
+      const result = ConnectionPayloadSchema.safeParse(validConnection);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
       // TypeScript type checking
-      const app = result.app;
-      const object = result.object;
-      const id: string = result.id;
-      const updatedAt: Date = result.updatedAt;
-      const inferred: boolean | undefined = result.inferred;
+      const app = result.data.app;
+      const object = result.data.object;
+      const id: string = result.data.id;
+      const updatedAt: Date = result.data.updatedAt;
+      const inferred: boolean | undefined = result.data.inferred;
       
       // expect(typeof app).toBe('string');
       // expect(typeof object).toBe('string');
@@ -600,15 +600,15 @@ describe('Connections Schema Validation', () => {
 
     test('should properly infer types for UpsertConnectionPayloadSchema', () => {
       const validUpsert = TestDataFactory.validUpsertConnectionPayload();
-      const result = UpsertConnectionPayloadSchema(validUpsert);
+      const result = UpsertConnectionPayloadSchema.safeParse(validUpsert);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
       // TypeScript type checking
-      const app = result.app;
-      const object = result.object;
-      const id: string = result.id;
+      const app = result.data.app;
+      const object = result.data.object;
+      const id: string = result.data.id;
       
       expect(typeof app).toBe('object');
       expect(typeof object).toBe('object');
@@ -624,17 +624,17 @@ describe('Connections Schema Validation', () => {
         id: 'c',
       };
       
-      const sourceResult = SourceSchema(minimalEntity);
-      const targetResult = TargetSchema(minimalEntity);
+      const sourceResult = SourceSchema.safeParse(minimalEntity);
+      const targetResult = TargetSchema.safeParse(minimalEntity);
       
-      expect(sourceResult).not.toBeInstanceOf(type.errors);
-      expect(targetResult).not.toBeInstanceOf(type.errors);
+      expect(sourceResult.success).toBe(true);
+      expect(targetResult.success).toBe(true);
       
-      if (sourceResult instanceof type.errors || targetResult instanceof type.errors) return;
+      if (!sourceResult.success || !targetResult.success) return;
       
-      expect(sourceResult.app).toBe('a');
-      expect(sourceResult.object).toBe('b');
-      expect(sourceResult.id).toBe('c');
+      expect(sourceResult.data.app).toBe('a');
+      expect(sourceResult.data.object).toBe('b');
+      expect(sourceResult.data.id).toBe('c');
     });
 
     test('should handle very long strings for entity fields', () => {
@@ -645,14 +645,14 @@ describe('Connections Schema Validation', () => {
         id: longString,
       };
       
-      const result = SourceSchema(longEntity);
+      const result = SourceSchema.safeParse(longEntity);
       
       // arktype string schema should accept long strings
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.id).toBe(longString);
-      expect(result.id.length).toBe(1000);
+      expect(result.data.id).toBe(longString);
+      expect(result.data.id.length).toBe(1000);
     });
 
     test('should handle special characters in id field', () => {
@@ -674,12 +674,12 @@ describe('Connections Schema Validation', () => {
           id: specialId,
         };
         
-        const result = SourceSchema(entity);
+        const result = SourceSchema.safeParse(entity);
         
-        expect(result).not.toBeInstanceOf(type.errors);
-        if (result instanceof type.errors) continue;
+        expect(result.success).toBe(true);
+        if (!result.success) continue;
         
-        expect(result.id).toBe(specialId);
+        expect(result.data.id).toBe(specialId);
       }
     });
 
@@ -705,13 +705,13 @@ describe('Connections Schema Validation', () => {
           updatedAt: input,
         };
         
-        const result = ConnectionPayloadSchema(connection);
+        const result = ConnectionPayloadSchema.safeParse(connection);
         
-        expect(result).not.toBeInstanceOf(type.errors);
-        if (result instanceof type.errors) continue;
+        expect(result.success).toBe(true);
+        if (!result.success) continue;
         
-        expect(result.updatedAt).toBeInstanceOf(Date);
-        expect(result.updatedAt.toISOString()).toBe(expected);
+        expect(result.data.updatedAt).toBeInstanceOf(Date);
+        expect(result.data.updatedAt.toISOString()).toBe(expected);
       }
     });
 
@@ -726,18 +726,18 @@ describe('Connections Schema Validation', () => {
         inferred: null,
       };
       
-      const result = ConnectionPayloadSchema(connectionWithNulls);
+      const result = ConnectionPayloadSchema.safeParse(connectionWithNulls);
       
       // Test the actual behavior - arktype might handle nulls differently
-      if (result instanceof type.errors) {
+      if (!result.success) {
         // If it throws, that's acceptable behavior for null handling
-        expect(result).toBeInstanceOf(type.errors);
+        expect(result.success).toBe(false);
       } else {
         // If it succeeds, nulls should be handled appropriately
-        expect(result.app).toBe('test-app');
-        expect(result.object).toBe('test-object');
-        expect(result.id).toBe('test-id');
-        expect(result.updatedAt).toBe('2024-01-01T00:00:00.000Z');
+        expect(result.data.app).toBe('test-app');
+        expect(result.data.object).toBe('test-object');
+        expect(result.data.id).toBe('test-id');
+        expect(result.data.updatedAt).toBe('2024-01-01T00:00:00.000Z');
       }
     });
   });

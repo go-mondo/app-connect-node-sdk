@@ -1,4 +1,4 @@
-import { type } from "arktype";
+import { z } from "zod";
 import { AppReferenceSchema } from "src/apps/schema.js";
 import {
 	type Handle,
@@ -13,59 +13,63 @@ export {
 	type Handle as AppObjectHandle,
 };
 
-const UrlScheama = type.instanceOf(URL);
-const UrlStringScheama = type("string.url");
+const UrlSchema = z.instanceof(URL);
+const UrlStringSchema = z.string().url();
 
-const AnyAppObjectUrlSchema = type("undefined")
-	.or(UrlScheama)
-	.or(UrlStringScheama);
+const AnyAppObjectUrlSchema = z.union([
+	z.undefined(),
+	UrlSchema,
+	UrlStringSchema,
+]);
 
-export const AppObjectUrlSchema = AnyAppObjectUrlSchema.pipe((v) =>
+export const AppObjectUrlSchema = AnyAppObjectUrlSchema.transform((v) =>
 	v instanceof URL ? v : v ? new URL(v) : undefined,
 );
 
-export const AppObjectUrlStringSchema = AnyAppObjectUrlSchema.pipe((v) =>
+export const AppObjectUrlStringSchema = AnyAppObjectUrlSchema.transform((v) =>
 	v === undefined ? undefined : normalizeUrlWithTokens(v),
 );
 
 export const NullableAppObjectUrlStringSchema = AnyAppObjectUrlSchema.or(
-	"null",
-).pipe((v) => (!v ? undefined : normalizeUrlWithTokens(v)));
+	z.null(),
+).transform((v) => (!v ? undefined : normalizeUrlWithTokens(v)));
 
-export const AppObjectReferenceSchema = type({
+export const AppObjectReferenceSchema = z.object({
 	handle: HandleSchema,
-	name: type("string"),
+	name: z.string(),
 });
-export type AppObjectReference = typeof AppObjectReferenceSchema.inferOut;
+export type AppObjectReference = z.output<typeof AppObjectReferenceSchema>;
 
-export const AppObjectSchema = AppObjectReferenceSchema.and({
+export const AppObjectSchema = AppObjectReferenceSchema.extend({
 	app: AppReferenceSchema,
 	url: AppObjectUrlSchema.optional(),
 	createdAt: RequiredDateSchema,
 	updatedAt: RequiredDateSchema,
 });
-export type AppObjectProperties = typeof AppObjectSchema.inferIn;
-export type AppObject = typeof AppObjectSchema.inferOut;
+export type AppObjectProperties = z.input<typeof AppObjectSchema>;
+export type AppObject = z.output<typeof AppObjectSchema>;
 
-export const AppObjectPayloadSchema = AppObjectReferenceSchema.and({
+export const AppObjectPayloadSchema = AppObjectReferenceSchema.extend({
 	app: AppReferenceSchema,
 	url: AppObjectUrlStringSchema.optional(),
 	createdAt: RequiredDatePayloadSchema,
 	updatedAt: RequiredDatePayloadSchema,
 });
-export type AppObjectPayload = typeof AppObjectPayloadSchema.inferOut;
+export type AppObjectPayload = z.output<typeof AppObjectPayloadSchema>;
 
-export const InsertAppObjectPayloadSchema = AppObjectReferenceSchema.and({
+export const InsertAppObjectPayloadSchema = AppObjectReferenceSchema.extend({
 	url: AppObjectUrlStringSchema.optional(),
 });
-export type InsertAppObjectInput = typeof InsertAppObjectPayloadSchema.inferIn;
-export type InsertAppObjectPayload =
-	typeof InsertAppObjectPayloadSchema.inferOut;
+export type InsertAppObjectInput = z.input<typeof InsertAppObjectPayloadSchema>;
+export type InsertAppObjectPayload = z.output<
+	typeof InsertAppObjectPayloadSchema
+>;
 
-export const UpdateAppObjectPayloadSchema = type({
-	name: type("string").optional(),
+export const UpdateAppObjectPayloadSchema = z.object({
+	name: z.string().optional(),
 	url: NullableAppObjectUrlStringSchema.optional(),
 });
-export type UpdateAppObjectInput = typeof UpdateAppObjectPayloadSchema.inferIn;
-export type UpdateAppObjectPayload =
-	typeof UpdateAppObjectPayloadSchema.inferOut;
+export type UpdateAppObjectInput = z.input<typeof UpdateAppObjectPayloadSchema>;
+export type UpdateAppObjectPayload = z.output<
+	typeof UpdateAppObjectPayloadSchema
+>;

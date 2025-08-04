@@ -1,4 +1,4 @@
-import { type } from 'arktype';
+import { z } from 'zod';
 import { describe, expect, test } from 'vitest';
 import { InvalidDataFactory, TestDataFactory } from '../common/test-utils.js';
 import {
@@ -34,14 +34,14 @@ describe('Configurations Schema Validation', () => {
         object: { handle: 'source-object', name: 'Source Object' },
       };
       
-      const result = SourceSchema(validSource);
+      const result = SourceSchema.safeParse(validSource);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.app).toEqual(validSource.app);
-      expect(result.object).toEqual(validSource.object);
-      expect(result.join).toBe(JoinType.ONE); // Default value
+      expect(result.data.app).toEqual(validSource.app);
+      expect(result.data.object).toEqual(validSource.object);
+      expect(result.data.join).toBe(JoinType.ONE); // Default value
     });
 
     test('should validate valid source entity with explicit join', () => {
@@ -51,14 +51,14 @@ describe('Configurations Schema Validation', () => {
         join: JoinType.MANY,
       };
       
-      const result = SourceSchema(validSource);
+      const result = SourceSchema.safeParse(validSource);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.app).toEqual(validSource.app);
-      expect(result.object).toEqual(validSource.object);
-      expect(result.join).toBe(JoinType.MANY);
+      expect(result.data.app).toEqual(validSource.app);
+      expect(result.data.object).toEqual(validSource.object);
+      expect(result.data.join).toBe(JoinType.MANY);
     });
 
     test('should validate both join type values', () => {
@@ -74,16 +74,16 @@ describe('Configurations Schema Validation', () => {
         join: JoinType.MANY,
       };
       
-      const resultOne = SourceSchema(sourceWithOne);
-      const resultMany = SourceSchema(sourceWithMany);
+      const resultOne = SourceSchema.safeParse(sourceWithOne);
+      const resultMany = SourceSchema.safeParse(sourceWithMany);
       
-      expect(resultOne).not.toBeInstanceOf(type.errors);
-      expect(resultMany).not.toBeInstanceOf(type.errors);
+      expect(resultOne.success).toBe(true);
+      expect(resultMany.success).toBe(true);
       
-      if (resultOne instanceof type.errors || resultMany instanceof type.errors) return;
+      if (!resultOne.success || !resultMany.success) return;
       
-      expect(resultOne.join).toBe(JoinType.ONE);
-      expect(resultMany.join).toBe(JoinType.MANY);
+      expect(resultOne.data.join).toBe(JoinType.ONE);
+      expect(resultMany.data.join).toBe(JoinType.MANY);
     });
 
     test('should reject invalid join type', () => {
@@ -93,8 +93,8 @@ describe('Configurations Schema Validation', () => {
         join: 'invalid-join-type',
       };
       
-      const result = SourceSchema(invalidSource);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = SourceSchema.safeParse(invalidSource);
+      expect(result.success).toBe(false);
     });
 
     test('should reject missing required app field', () => {
@@ -103,8 +103,8 @@ describe('Configurations Schema Validation', () => {
         join: JoinType.ONE,
       };
       
-      const result = SourceSchema(invalidSource);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = SourceSchema.safeParse(invalidSource);
+      expect(result.success).toBe(false);
     });
 
     test('should reject missing required object field', () => {
@@ -113,8 +113,8 @@ describe('Configurations Schema Validation', () => {
         join: JoinType.ONE,
       };
       
-      const result = SourceSchema(invalidSource);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = SourceSchema.safeParse(invalidSource);
+      expect(result.success).toBe(false);
     });
 
     test('should reject invalid app handle format', () => {
@@ -124,8 +124,8 @@ describe('Configurations Schema Validation', () => {
         join: JoinType.ONE,
       };
       
-      const result = SourceSchema(invalidSource);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = SourceSchema.safeParse(invalidSource);
+      expect(result.success).toBe(false);
     });
 
     test('should reject invalid object handle format', () => {
@@ -135,8 +135,8 @@ describe('Configurations Schema Validation', () => {
         join: JoinType.ONE,
       };
       
-      const result = SourceSchema(invalidSource);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = SourceSchema.safeParse(invalidSource);
+      expect(result.success).toBe(false);
     });
   });
 
@@ -147,14 +147,14 @@ describe('Configurations Schema Validation', () => {
         object: { handle: 'target-object', name: 'Target Object' },
       };
       
-      const result = TargetSchema(validTarget);
+      const result = TargetSchema.safeParse(validTarget);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.app).toEqual(validTarget.app);
-      expect(result.object).toEqual(validTarget.object);
-      expect(result.join).toBe(JoinType.ONE); // Default value
+      expect(result.data.app).toEqual(validTarget.app);
+      expect(result.data.object).toEqual(validTarget.object);
+      expect(result.data.join).toBe(JoinType.ONE); // Default value
     });
 
     test('should validate valid target entity with explicit join', () => {
@@ -164,14 +164,14 @@ describe('Configurations Schema Validation', () => {
         join: JoinType.MANY,
       };
       
-      const result = TargetSchema(validTarget);
+      const result = TargetSchema.safeParse(validTarget);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.app).toEqual(validTarget.app);
-      expect(result.object).toEqual(validTarget.object);
-      expect(result.join).toBe(JoinType.MANY);
+      expect(result.data.app).toEqual(validTarget.app);
+      expect(result.data.object).toEqual(validTarget.object);
+      expect(result.data.join).toBe(JoinType.MANY);
     });
 
     test('should validate both join type values', () => {
@@ -187,16 +187,16 @@ describe('Configurations Schema Validation', () => {
         join: JoinType.MANY,
       };
       
-      const resultOne = TargetSchema(targetWithOne);
-      const resultMany = TargetSchema(targetWithMany);
+      const resultOne = TargetSchema.safeParse(targetWithOne);
+      const resultMany = TargetSchema.safeParse(targetWithMany);
       
-      expect(resultOne).not.toBeInstanceOf(type.errors);
-      expect(resultMany).not.toBeInstanceOf(type.errors);
+      expect(resultOne.success).toBe(true);
+      expect(resultMany.success).toBe(true);
       
-      if (resultOne instanceof type.errors || resultMany instanceof type.errors) return;
+      if (!resultOne.success || !resultMany.success) return;
       
-      expect(resultOne.join).toBe(JoinType.ONE);
-      expect(resultMany.join).toBe(JoinType.MANY);
+      expect(resultOne.data.join).toBe(JoinType.ONE);
+      expect(resultMany.data.join).toBe(JoinType.MANY);
     });
 
     test('should reject invalid join type', () => {
@@ -206,8 +206,8 @@ describe('Configurations Schema Validation', () => {
         join: 'invalid-join-type',
       };
       
-      const result = TargetSchema(invalidTarget);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = TargetSchema.safeParse(invalidTarget);
+      expect(result.success).toBe(false);
     });
 
     test('should reject missing required fields', () => {
@@ -221,30 +221,30 @@ describe('Configurations Schema Validation', () => {
         join: JoinType.ONE,
       };
       
-      const resultMissingApp = TargetSchema(invalidTargetMissingApp);
-      const resultMissingObject = TargetSchema(invalidTargetMissingObject);
+      const resultMissingApp = TargetSchema.safeParse(invalidTargetMissingApp);
+      const resultMissingObject = TargetSchema.safeParse(invalidTargetMissingObject);
       
-      expect(resultMissingApp).toBeInstanceOf(type.errors);
-      expect(resultMissingObject).toBeInstanceOf(type.errors);
+      expect(resultMissingApp.success).toBe(false);
+      expect(resultMissingObject.success).toBe(false);
     });
   });
 
   describe('ConfigurationSchema', () => {
     test('should validate complete valid configuration data', () => {
       const validConfiguration = TestDataFactory.validConfiguration();
-      const result = ConfigurationSchema(validConfiguration);
+      const result = ConfigurationSchema.safeParse(validConfiguration);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.source.app).toEqual(validConfiguration.source.app);
-      expect(result.source.object).toEqual(validConfiguration.source.object);
-      expect(result.source.join).toBe(validConfiguration.source.join);
-      expect(result.target.app).toEqual(validConfiguration.target.app);
-      expect(result.target.object).toEqual(validConfiguration.target.object);
-      expect(result.target.join).toBe(validConfiguration.target.join);
-      expect(result.status).toBe(validConfiguration.status);
-      expect(result.updatedAt).toBeInstanceOf(Date);
+      expect(result.data.source.app).toEqual(validConfiguration.source.app);
+      expect(result.data.source.object).toEqual(validConfiguration.source.object);
+      expect(result.data.source.join).toBe(validConfiguration.source.join);
+      expect(result.data.target.app).toEqual(validConfiguration.target.app);
+      expect(result.data.target.object).toEqual(validConfiguration.target.object);
+      expect(result.data.target.join).toBe(validConfiguration.target.join);
+      expect(result.data.status).toBe(validConfiguration.status);
+      expect(result.data.updatedAt).toBeInstanceOf(Date);
     });
 
     test('should validate configuration with default status', () => {
@@ -262,12 +262,12 @@ describe('Configurations Schema Validation', () => {
         updatedAt: new Date('2024-01-01T00:00:00.000Z').toISOString(),
       };
       
-      const result = ConfigurationSchema(configurationWithoutStatus);
+      const result = ConfigurationSchema.safeParse(configurationWithoutStatus);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.status).toBe(ConfigurationStatus.ENABLED); // Default value
+      expect(result.data.status).toBe(ConfigurationStatus.ENABLED); // Default value
     });
 
     test('should validate configuration with explicit disabled status', () => {
@@ -286,12 +286,12 @@ describe('Configurations Schema Validation', () => {
         updatedAt: new Date('2024-01-01T00:00:00.000Z').toISOString(),
       };
       
-      const result = ConfigurationSchema(disabledConfiguration);
+      const result = ConfigurationSchema.safeParse(disabledConfiguration);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.status).toBe(ConfigurationStatus.DISABLED);
+      expect(result.data.status).toBe(ConfigurationStatus.DISABLED);
     });
 
     test('should handle Date objects for updatedAt field', () => {
@@ -310,25 +310,25 @@ describe('Configurations Schema Validation', () => {
         updatedAt: new Date('2024-01-01T00:00:00.000Z'),
       };
       
-      const result = ConfigurationSchema(configurationWithDateObject);
+      const result = ConfigurationSchema.safeParse(configurationWithDateObject);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.updatedAt).toBeInstanceOf(Date);
-      expect(result.updatedAt.toISOString()).toBe('2024-01-01T00:00:00.000Z');
+      expect(result.data.updatedAt).toBeInstanceOf(Date);
+      expect(result.data.updatedAt.toISOString()).toBe('2024-01-01T00:00:00.000Z');
     });
 
     test('should reject configuration with invalid status', () => {
       const invalidConfiguration = InvalidDataFactory.invalidConfigurationBadStatus();
-      const result = ConfigurationSchema(invalidConfiguration);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = ConfigurationSchema.safeParse(invalidConfiguration);
+      expect(result.success).toBe(false);
     });
 
     test('should reject configuration with invalid join type', () => {
       const invalidConfiguration = InvalidDataFactory.invalidConfigurationBadJoin();
-      const result = ConfigurationSchema(invalidConfiguration);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = ConfigurationSchema.safeParse(invalidConfiguration);
+      expect(result.success).toBe(false);
     });
 
     test('should reject configuration with missing required fields', () => {
@@ -342,8 +342,8 @@ describe('Configurations Schema Validation', () => {
         updatedAt: new Date().toISOString(),
       };
       
-      const result = ConfigurationSchema(invalidConfigurationMissingSource);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = ConfigurationSchema.safeParse(invalidConfigurationMissingSource);
+      expect(result.success).toBe(false);
     });
 
     test('should reject configuration with invalid date format', () => {
@@ -362,27 +362,27 @@ describe('Configurations Schema Validation', () => {
         updatedAt: 'invalid-date',
       };
       
-      const result = ConfigurationSchema(invalidConfiguration);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = ConfigurationSchema.safeParse(invalidConfiguration);
+      expect(result.success).toBe(false);
     });
   });
 
   describe('ConfigurationPayloadSchema', () => {
     test('should validate complete valid configuration payload', () => {
       const validConfiguration = TestDataFactory.validConfiguration();
-      const result = ConfigurationPayloadSchema(validConfiguration);
+      const result = ConfigurationPayloadSchema.safeParse(validConfiguration);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.source.app).toEqual(validConfiguration.source.app);
-      expect(result.source.object).toEqual(validConfiguration.source.object);
-      expect(result.source.join).toBe(validConfiguration.source.join);
-      expect(result.target.app).toEqual(validConfiguration.target.app);
-      expect(result.target.object).toEqual(validConfiguration.target.object);
-      expect(result.target.join).toBe(validConfiguration.target.join);
-      expect(result.status).toBe(validConfiguration.status);
-      expect(result.updatedAt).toBe(validConfiguration.updatedAt);
+      expect(result.data.source.app).toEqual(validConfiguration.source.app);
+      expect(result.data.source.object).toEqual(validConfiguration.source.object);
+      expect(result.data.source.join).toBe(validConfiguration.source.join);
+      expect(result.data.target.app).toEqual(validConfiguration.target.app);
+      expect(result.data.target.object).toEqual(validConfiguration.target.object);
+      expect(result.data.target.join).toBe(validConfiguration.target.join);
+      expect(result.data.status).toBe(validConfiguration.status);
+      expect(result.data.updatedAt).toBe(validConfiguration.updatedAt);
     });
 
     test('should convert Date objects to ISO strings for updatedAt', () => {
@@ -401,12 +401,12 @@ describe('Configurations Schema Validation', () => {
         updatedAt: new Date('2024-01-01T00:00:00.000Z'),
       };
       
-      const result = ConfigurationPayloadSchema(configurationWithDateObject);
+      const result = ConfigurationPayloadSchema.safeParse(configurationWithDateObject);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.updatedAt).toBe('2024-01-01T00:00:00.000Z');
+      expect(result.data.updatedAt).toBe('2024-01-01T00:00:00.000Z');
     });
 
     test('should apply default values for status and join fields', () => {
@@ -422,44 +422,44 @@ describe('Configurations Schema Validation', () => {
         updatedAt: new Date('2024-01-01T00:00:00.000Z'),
       };
       
-      const result = ConfigurationPayloadSchema(minimalConfiguration);
+      const result = ConfigurationPayloadSchema.safeParse(minimalConfiguration);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.source.join).toBe(JoinType.ONE); // Default
-      expect(result.target.join).toBe(JoinType.ONE); // Default
-      expect(result.status).toBe(ConfigurationStatus.ENABLED); // Default
+      expect(result.data.source.join).toBe(JoinType.ONE); // Default
+      expect(result.data.target.join).toBe(JoinType.ONE); // Default
+      expect(result.data.status).toBe(ConfigurationStatus.ENABLED); // Default
     });
 
     test('should reject payload with invalid status', () => {
       const invalidPayload = InvalidDataFactory.invalidConfigurationBadStatus();
-      const result = ConfigurationPayloadSchema(invalidPayload);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = ConfigurationPayloadSchema.safeParse(invalidPayload);
+      expect(result.success).toBe(false);
     });
 
     test('should reject payload with invalid join type', () => {
       const invalidPayload = InvalidDataFactory.invalidConfigurationBadJoin();
-      const result = ConfigurationPayloadSchema(invalidPayload);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = ConfigurationPayloadSchema.safeParse(invalidPayload);
+      expect(result.success).toBe(false);
     });
   });
 
   describe('UpsertConfigurationPayloadSchema', () => {
     test('should validate complete valid upsert configuration payload', () => {
       const validUpsertPayload = TestDataFactory.validUpsertConfigurationPayload();
-      const result = UpsertConfigurationPayloadSchema(validUpsertPayload);
+      const result = UpsertConfigurationPayloadSchema.safeParse(validUpsertPayload);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.source.app).toEqual({ handle: 'source-app' });
-      expect(result.source.object).toEqual({ handle: 'source-object' });
-      expect(result.source.join).toBe(validUpsertPayload.source.join);
-      expect(result.target.app).toEqual({ handle: 'target-app' });
-      expect(result.target.object).toEqual({ handle: 'target-object' });
-      expect(result.target.join).toBe(validUpsertPayload.target.join);
-      expect(result.status).toBe(validUpsertPayload.status);
+      expect(result.data.source.app).toEqual({ handle: 'source-app' });
+      expect(result.data.source.object).toEqual({ handle: 'source-object' });
+      expect(result.data.source.join).toBe(validUpsertPayload.source.join);
+      expect(result.data.target.app).toEqual({ handle: 'target-app' });
+      expect(result.data.target.object).toEqual({ handle: 'target-object' });
+      expect(result.data.target.join).toBe(validUpsertPayload.target.join);
+      expect(result.data.status).toBe(validUpsertPayload.status);
     });
 
     test('should validate upsert payload without updatedAt field', () => {
@@ -477,14 +477,14 @@ describe('Configurations Schema Validation', () => {
         status: ConfigurationStatus.DISABLED,
       };
       
-      const result = UpsertConfigurationPayloadSchema(upsertPayloadWithoutDate);
+      const result = UpsertConfigurationPayloadSchema.safeParse(upsertPayloadWithoutDate);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.source.app).toEqual({ handle: 'source-app' });
-      expect(result.target.join).toBe(upsertPayloadWithoutDate.target.join);
-      expect(result.status).toBe(upsertPayloadWithoutDate.status);
+      expect(result.data.source.app).toEqual({ handle: 'source-app' });
+      expect(result.data.target.join).toBe(upsertPayloadWithoutDate.target.join);
+      expect(result.data.status).toBe(upsertPayloadWithoutDate.status);
     });
 
     test('should apply default values for status and join fields', () => {
@@ -499,14 +499,14 @@ describe('Configurations Schema Validation', () => {
         },
       };
       
-      const result = UpsertConfigurationPayloadSchema(minimalUpsertPayload);
+      const result = UpsertConfigurationPayloadSchema.safeParse(minimalUpsertPayload);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.source.join).toBe(JoinType.ONE); // Default
-      expect(result.target.join).toBe(JoinType.ONE); // Default
-      expect(result.status).toBe(ConfigurationStatus.ENABLED); // Default
+      expect(result.data.source.join).toBe(JoinType.ONE); // Default
+      expect(result.data.target.join).toBe(JoinType.ONE); // Default
+      expect(result.data.status).toBe(ConfigurationStatus.ENABLED); // Default
     });
 
     test('should reject upsert payload with invalid status', () => {
@@ -524,8 +524,8 @@ describe('Configurations Schema Validation', () => {
         status: 'invalid-status',
       };
       
-      const result = UpsertConfigurationPayloadSchema(invalidUpsertPayload);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = UpsertConfigurationPayloadSchema.safeParse(invalidUpsertPayload);
+      expect(result.success).toBe(false);
     });
 
     test('should reject upsert payload with invalid join type', () => {
@@ -543,8 +543,8 @@ describe('Configurations Schema Validation', () => {
         status: ConfigurationStatus.ENABLED,
       };
       
-      const result = UpsertConfigurationPayloadSchema(invalidUpsertPayload);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = UpsertConfigurationPayloadSchema.safeParse(invalidUpsertPayload);
+      expect(result.success).toBe(false);
     });
 
     test('should reject upsert payload with missing required fields', () => {
@@ -557,27 +557,27 @@ describe('Configurations Schema Validation', () => {
         status: ConfigurationStatus.ENABLED,
       };
       
-      const result = UpsertConfigurationPayloadSchema(invalidUpsertPayloadMissingTarget);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = UpsertConfigurationPayloadSchema.safeParse(invalidUpsertPayloadMissingTarget);
+      expect(result.success).toBe(false);
     });
   });
 
   describe('ConfigurationIdentifiersSchema', () => {
     test('should validate valid configuration identifiers', () => {
       const validIdentifiers = TestDataFactory.validConfigurationIdentifiers();
-      const result = ConfigurationIdentifiersSchema(validIdentifiers);
+      const result = ConfigurationIdentifiersSchema.safeParse(validIdentifiers);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.source.app).toEqual({ handle: 'source-app' });
-      expect(result.source.object).toEqual({ handle: 'source-object' });
-      expect(result.target.app).toEqual({ handle: 'target-app' });
-      expect(result.target.object).toEqual({ handle: 'target-object' });
+      expect(result.data.source.app).toEqual({ handle: 'source-app' });
+      expect(result.data.source.object).toEqual({ handle: 'source-object' });
+      expect(result.data.target.app).toEqual({ handle: 'target-app' });
+      expect(result.data.target.object).toEqual({ handle: 'target-object' });
       
       // Should not have join fields (omitted)
-      expect('join' in result.source).toBe(false);
-      expect('join' in result.target).toBe(false);
+      expect('join' in result.data.source).toBe(false);
+      expect('join' in result.data.target).toBe(false);
     });
 
     test('should validate identifiers without requiring join fields', () => {
@@ -594,15 +594,15 @@ describe('Configurations Schema Validation', () => {
         },
       };
       
-      const result = ConfigurationIdentifiersSchema(identifiersWithoutJoin);
+      const result = ConfigurationIdentifiersSchema.safeParse(identifiersWithoutJoin);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.source.app).toEqual({ handle: 'source-app' });
-      expect(result.source.object).toEqual({ handle: 'source-object' });
-      expect(result.target.app).toEqual({ handle: 'target-app' });
-      expect(result.target.object).toEqual({ handle: 'target-object' });
+      expect(result.data.source.app).toEqual({ handle: 'source-app' });
+      expect(result.data.source.object).toEqual({ handle: 'source-object' });
+      expect(result.data.target.app).toEqual({ handle: 'target-app' });
+      expect(result.data.target.object).toEqual({ handle: 'target-object' });
     });
 
     test('should reject identifiers with missing required fields', () => {
@@ -616,8 +616,8 @@ describe('Configurations Schema Validation', () => {
         },
       };
       
-      const result = ConfigurationIdentifiersSchema(invalidIdentifiersMissingSourceApp);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = ConfigurationIdentifiersSchema.safeParse(invalidIdentifiersMissingSourceApp);
+      expect(result.success).toBe(false);
     });
 
     test('should reject identifiers with invalid handle formats', () => {
@@ -632,8 +632,8 @@ describe('Configurations Schema Validation', () => {
         },
       };
       
-      const result = ConfigurationIdentifiersSchema(invalidIdentifiersBadHandle);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = ConfigurationIdentifiersSchema.safeParse(invalidIdentifiersBadHandle);
+      expect(result.success).toBe(false);
     });
 
     test('should reject identifiers missing target', () => {
@@ -644,8 +644,8 @@ describe('Configurations Schema Validation', () => {
         },
       };
       
-      const result = ConfigurationIdentifiersSchema(invalidIdentifiersMissingTarget);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = ConfigurationIdentifiersSchema.safeParse(invalidIdentifiersMissingTarget);
+      expect(result.success).toBe(false);
     });
 
     test('should reject identifiers missing source', () => {
@@ -656,8 +656,8 @@ describe('Configurations Schema Validation', () => {
         },
       };
       
-      const result = ConfigurationIdentifiersSchema(invalidIdentifiersMissingSource);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = ConfigurationIdentifiersSchema.safeParse(invalidIdentifiersMissingSource);
+      expect(result.success).toBe(false);
     });
   });
 
@@ -678,22 +678,22 @@ describe('Configurations Schema Validation', () => {
         updatedAt: new Date('2024-01-01T00:00:00.000Z').toISOString(),
       };
       
-      const result = ConfigurationSchema(configurationWithComplexNesting);
+      const result = ConfigurationSchema.safeParse(configurationWithComplexNesting);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
       // Verify nested source validation
-      expect(result.source.app).toEqual({ handle: 'complex-source-app', name: 'Complex Source App' });
-      expect(result.source.object).toEqual({ handle: 'complex-source-object', name: 'Complex Source Object' });
-      expect(result.source.join).toBe(JoinType.MANY);
+      expect(result.data.source.app).toEqual({ handle: 'complex-source-app', name: 'Complex Source App' });
+      expect(result.data.source.object).toEqual({ handle: 'complex-source-object', name: 'Complex Source Object' });
+      expect(result.data.source.join).toBe(JoinType.MANY);
       
       // Verify nested target validation
-      expect(result.target.app).toEqual({ handle: 'complex-target-app', name: 'Complex Target App' });
-      expect(result.target.object).toEqual({ handle: 'complex-target-object', name: 'Complex Target Object' });
-      expect(result.target.join).toBe(JoinType.ONE);
+      expect(result.data.target.app).toEqual({ handle: 'complex-target-app', name: 'Complex Target App' });
+      expect(result.data.target.object).toEqual({ handle: 'complex-target-object', name: 'Complex Target Object' });
+      expect(result.data.target.join).toBe(JoinType.ONE);
       
-      expect(result.status).toBe(ConfigurationStatus.DISABLED);
+      expect(result.data.status).toBe(ConfigurationStatus.DISABLED);
     });
 
     test('should reject configuration with invalid nested source', () => {
@@ -712,8 +712,8 @@ describe('Configurations Schema Validation', () => {
         updatedAt: new Date().toISOString(),
       };
       
-      const result = ConfigurationSchema(configurationWithInvalidSource);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = ConfigurationSchema.safeParse(configurationWithInvalidSource);
+      expect(result.success).toBe(false);
     });
 
     test('should reject configuration with invalid nested target', () => {
@@ -732,8 +732,8 @@ describe('Configurations Schema Validation', () => {
         updatedAt: new Date().toISOString(),
       };
       
-      const result = ConfigurationSchema(configurationWithInvalidTarget);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = ConfigurationSchema.safeParse(configurationWithInvalidTarget);
+      expect(result.success).toBe(false);
     });
   });
 
@@ -754,13 +754,13 @@ describe('Configurations Schema Validation', () => {
         updatedAt: new Date().toISOString(),
       };
       
-      const result = ConfigurationSchema(configurationWithoutSourceJoin);
+      const result = ConfigurationSchema.safeParse(configurationWithoutSourceJoin);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.source.join).toBe(JoinType.ONE); // Default value
-      expect(result.target.join).toBe(JoinType.MANY); // Explicit value
+      expect(result.data.source.join).toBe(JoinType.ONE); // Default value
+      expect(result.data.target.join).toBe(JoinType.MANY); // Explicit value
     });
 
     test('should apply default join value to target when not provided', () => {
@@ -779,13 +779,13 @@ describe('Configurations Schema Validation', () => {
         updatedAt: new Date().toISOString(),
       };
       
-      const result = ConfigurationSchema(configurationWithoutTargetJoin);
+      const result = ConfigurationSchema.safeParse(configurationWithoutTargetJoin);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.source.join).toBe(JoinType.MANY); // Explicit value
-      expect(result.target.join).toBe(JoinType.ONE); // Default value
+      expect(result.data.source.join).toBe(JoinType.MANY); // Explicit value
+      expect(result.data.target.join).toBe(JoinType.ONE); // Default value
     });
 
     test('should apply default status value when not provided', () => {
@@ -804,12 +804,12 @@ describe('Configurations Schema Validation', () => {
         updatedAt: new Date().toISOString(),
       };
       
-      const result = ConfigurationSchema(configurationWithoutStatus);
+      const result = ConfigurationSchema.safeParse(configurationWithoutStatus);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.status).toBe(ConfigurationStatus.ENABLED); // Default value
+      expect(result.data.status).toBe(ConfigurationStatus.ENABLED); // Default value
     });
 
     test('should apply all default values when minimal data provided', () => {
@@ -825,34 +825,34 @@ describe('Configurations Schema Validation', () => {
         updatedAt: new Date().toISOString(),
       };
       
-      const result = ConfigurationSchema(minimalConfiguration);
+      const result = ConfigurationSchema.safeParse(minimalConfiguration);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.source.join).toBe(JoinType.ONE); // Default
-      expect(result.target.join).toBe(JoinType.ONE); // Default
-      expect(result.status).toBe(ConfigurationStatus.ENABLED); // Default
+      expect(result.data.source.join).toBe(JoinType.ONE); // Default
+      expect(result.data.target.join).toBe(JoinType.ONE); // Default
+      expect(result.data.status).toBe(ConfigurationStatus.ENABLED); // Default
     });
   });
 
   describe('Type inference validation', () => {
     test('should properly infer types for ConfigurationSchema', () => {
       const validConfiguration = TestDataFactory.validConfiguration();
-      const result = ConfigurationSchema(validConfiguration);
+      const result = ConfigurationSchema.safeParse(validConfiguration);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
       // TypeScript type checking - these should not cause compilation errors
-      const sourceApp: { handle: string; name: string } = result.source.app;
-      const sourceObject: { handle: string; name: string } = result.source.object;
-      const sourceJoin: 'one' | 'many' = result.source.join;
-      const targetApp: { handle: string; name: string } = result.target.app;
-      const targetObject: { handle: string; name: string } = result.target.object;
-      const targetJoin: 'one' | 'many' = result.target.join;
-      const status: 'enabled' | 'disabled' = result.status;
-      const updatedAt: Date = result.updatedAt;
+      const sourceApp: { handle: string; name: string } = result.data.source.app;
+      const sourceObject: { handle: string; name: string } = result.data.source.object;
+      const sourceJoin: 'one' | 'many' = result.data.source.join;
+      const targetApp: { handle: string; name: string } = result.data.target.app;
+      const targetObject: { handle: string; name: string } = result.data.target.object;
+      const targetJoin: 'one' | 'many' = result.data.target.join;
+      const status: 'enabled' | 'disabled' = result.data.status;
+      const updatedAt: Date = result.data.updatedAt;
       
       expect(typeof sourceApp).toBe('object');
       expect(typeof sourceObject).toBe('object');
@@ -870,15 +870,15 @@ describe('Configurations Schema Validation', () => {
 
     test('should properly infer types for payload schemas', () => {
       const validPayload = TestDataFactory.validUpsertConfigurationPayload();
-      const result = UpsertConfigurationPayloadSchema(validPayload);
+      const result = UpsertConfigurationPayloadSchema.safeParse(validPayload);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
       // TypeScript type checking
-      const sourceApp: { handle: string } = result.source.app;
-      const sourceJoin: 'one' | 'many' = result.source.join;
-      const status: 'enabled' | 'disabled' = result.status;
+      const sourceApp: { handle: string } = result.data.source.app;
+      const sourceJoin: 'one' | 'many' = result.data.source.join;
+      const status: 'enabled' | 'disabled' = result.data.status;
       
       expect(typeof sourceApp).toBe('object');
       expect(sourceApp).toHaveProperty('handle');
@@ -888,16 +888,16 @@ describe('Configurations Schema Validation', () => {
 
     test('should properly infer types for ConfigurationIdentifiersSchema', () => {
       const validIdentifiers = TestDataFactory.validConfigurationIdentifiers();
-      const result = ConfigurationIdentifiersSchema(validIdentifiers);
+      const result = ConfigurationIdentifiersSchema.safeParse(validIdentifiers);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
       // TypeScript type checking
-      const sourceApp: { handle: string } = result.source.app;
-      const sourceObject: { handle: string } = result.source.object;
-      const targetApp: { handle: string } = result.target.app;
-      const targetObject: { handle: string } = result.target.object;
+      const sourceApp: { handle: string } = result.data.source.app;
+      const sourceObject: { handle: string } = result.data.source.object;
+      const targetApp: { handle: string } = result.data.target.app;
+      const targetObject: { handle: string } = result.data.target.object;
       
       expect(typeof sourceApp).toBe('object');
       expect(sourceApp).toHaveProperty('handle');
@@ -909,8 +909,8 @@ describe('Configurations Schema Validation', () => {
       expect(targetObject).toHaveProperty('handle');
       
       // Should not have join properties
-      expect('join' in result.source).toBe(false);
-      expect('join' in result.target).toBe(false);
+      expect('join' in result.data.source).toBe(false);
+      expect('join' in result.data.target).toBe(false);
     });
   });
 });

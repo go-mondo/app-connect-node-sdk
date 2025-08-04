@@ -1,4 +1,4 @@
-import { type } from 'arktype';
+import { z } from 'zod';
 import { describe, expect, test } from 'vitest';
 import * as ConfigurationsModule from './index.js';
 import {
@@ -40,12 +40,12 @@ describe('Configurations Index Module', () => {
     });
 
     test('should export schema functions as callable functions', () => {
-      expect(typeof ConfigurationsModule.ConfigurationSchema).toBe('function');
-      expect(typeof ConfigurationsModule.ConfigurationPayloadSchema).toBe('function');
-      expect(typeof ConfigurationsModule.UpsertConfigurationPayloadSchema).toBe('function');
-      expect(typeof ConfigurationsModule.ConfigurationIdentifiersSchema).toBe('function');
-      expect(typeof ConfigurationsModule.SourceSchema).toBe('function');
-      expect(typeof ConfigurationsModule.TargetSchema).toBe('function');
+      expect(typeof ConfigurationsModule.ConfigurationSchema).toBe('object');
+      expect(typeof ConfigurationsModule.ConfigurationPayloadSchema).toBe('object');
+      expect(typeof ConfigurationsModule.UpsertConfigurationPayloadSchema).toBe('object');
+      expect(typeof ConfigurationsModule.ConfigurationIdentifiersSchema).toBe('object');
+      expect(typeof ConfigurationsModule.SourceSchema).toBe('object');
+      expect(typeof ConfigurationsModule.TargetSchema).toBe('object');
     });
   });
 
@@ -229,16 +229,16 @@ describe('Configurations Index Module', () => {
       };
       
       // Test that we can use the exported schemas
-      const configResult = ConfigurationsModule.ConfigurationSchema(testConfiguration);
-      const payloadResult = ConfigurationsModule.ConfigurationPayloadSchema(testConfiguration);
-      const sourceResult = ConfigurationsModule.SourceSchema(testConfiguration.source);
-      const targetResult = ConfigurationsModule.TargetSchema(testConfiguration.target);
+      const configResult = ConfigurationsModule.ConfigurationSchema.safeParse(testConfiguration);
+      const payloadResult = ConfigurationsModule.ConfigurationPayloadSchema.safeParse(testConfiguration);
+      const sourceResult = ConfigurationsModule.SourceSchema.safeParse(testConfiguration.source);
+      const targetResult = ConfigurationsModule.TargetSchema.safeParse(testConfiguration.target);
       
-      // Verify results are valid (not error objects)
-      expect(configResult).not.toBeInstanceOf(type.errors);
-      expect(payloadResult).not.toBeInstanceOf(type.errors);
-      expect(sourceResult).not.toBeInstanceOf(type.errors);
-      expect(targetResult).not.toBeInstanceOf(type.errors);
+      // Verify results are valid (successful parsing)
+      expect(configResult.success).toBe(true);
+      expect(payloadResult.success).toBe(true);
+      expect(sourceResult.success).toBe(true);
+      expect(targetResult.success).toBe(true);
     });
 
     test('should maintain schema behavior through module exports', () => {
@@ -268,12 +268,12 @@ describe('Configurations Index Module', () => {
       };
       
       // Test upsert schema
-      const upsertResult = ConfigurationsModule.UpsertConfigurationPayloadSchema(validUpsertData);
-      expect(upsertResult).not.toBeInstanceOf(type.errors);
+      const upsertResult = ConfigurationsModule.UpsertConfigurationPayloadSchema.safeParse(validUpsertData);
+      expect(upsertResult.success).toBe(true);
       
       // Test identifiers schema
-      const identifiersResult = ConfigurationsModule.ConfigurationIdentifiersSchema(validIdentifiersData);
-      expect(identifiersResult).not.toBeInstanceOf(type.errors);
+      const identifiersResult = ConfigurationsModule.ConfigurationIdentifiersSchema.safeParse(validIdentifiersData);
+      expect(identifiersResult.success).toBe(true);
     });
 
     test('should work with enum values from module exports', () => {
@@ -292,8 +292,8 @@ describe('Configurations Index Module', () => {
         updatedAt: new Date().toISOString(),
       };
       
-      const result = ConfigurationsModule.ConfigurationSchema(configurationWithModuleEnums);
-      expect(result).not.toBeInstanceOf(type.errors);
+      const result = ConfigurationsModule.ConfigurationSchema.safeParse(configurationWithModuleEnums);
+      expect(result.success).toBe(true);
     });
   });
 
@@ -334,15 +334,15 @@ describe('Configurations Index Module', () => {
         updatedAt: new Date().toISOString(),
       };
       
-      const result = ConfigurationsModule.ConfigurationSchema(minimalConfiguration);
-      expect(result).not.toBeInstanceOf(type.errors);
+      const result = ConfigurationsModule.ConfigurationSchema.safeParse(minimalConfiguration);
+      expect(result.success).toBe(true);
       
-      if (result instanceof type.errors) return;
+      if (!result.success) return;
       
       // Verify default values are applied
-      expect(result.source.join).toBe(ConfigurationsModule.JoinType.ONE);
-      expect(result.target.join).toBe(ConfigurationsModule.JoinType.ONE);
-      expect(result.status).toBe(ConfigurationsModule.ConfigurationStatus.ENABLED);
+      expect(result.data.source.join).toBe(ConfigurationsModule.JoinType.ONE);
+      expect(result.data.target.join).toBe(ConfigurationsModule.JoinType.ONE);
+      expect(result.data.status).toBe(ConfigurationsModule.ConfigurationStatus.ENABLED);
     });
 
     test('should respect explicit values over defaults through exported schemas', () => {
@@ -361,15 +361,15 @@ describe('Configurations Index Module', () => {
         updatedAt: new Date().toISOString(),
       };
       
-      const result = ConfigurationsModule.ConfigurationSchema(explicitConfiguration);
-      expect(result).not.toBeInstanceOf(type.errors);
+      const result = ConfigurationsModule.ConfigurationSchema.safeParse(explicitConfiguration);
+      expect(result.success).toBe(true);
       
-      if (result instanceof type.errors) return;
+      if (!result.success) return;
       
       // Verify explicit values are preserved
-      expect(result.source.join).toBe(ConfigurationsModule.JoinType.MANY);
-      expect(result.target.join).toBe(ConfigurationsModule.JoinType.MANY);
-      expect(result.status).toBe(ConfigurationsModule.ConfigurationStatus.DISABLED);
+      expect(result.data.source.join).toBe(ConfigurationsModule.JoinType.MANY);
+      expect(result.data.target.join).toBe(ConfigurationsModule.JoinType.MANY);
+      expect(result.data.status).toBe(ConfigurationsModule.ConfigurationStatus.DISABLED);
     });
   });
 
@@ -390,8 +390,8 @@ describe('Configurations Index Module', () => {
         updatedAt: new Date().toISOString(),
       };
       
-      const result = ConfigurationsModule.ConfigurationSchema(invalidConfiguration);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = ConfigurationsModule.ConfigurationSchema.safeParse(invalidConfiguration);
+      expect(result.success).toBe(false);
     });
 
     test('should handle invalid enum values through exported schemas', () => {
@@ -410,8 +410,8 @@ describe('Configurations Index Module', () => {
         updatedAt: new Date().toISOString(),
       };
       
-      const result = ConfigurationsModule.ConfigurationSchema(invalidEnumConfiguration);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = ConfigurationsModule.ConfigurationSchema.safeParse(invalidEnumConfiguration);
+      expect(result.success).toBe(false);
     });
   });
 });

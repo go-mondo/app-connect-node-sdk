@@ -1,4 +1,4 @@
-import { type } from 'arktype';
+import { z } from 'zod';
 import { describe, expect, test } from 'vitest';
 import { TestDataFactory } from '../common/test-utils.js';
 import {
@@ -25,9 +25,9 @@ describe('Objects Schema Validation', () => {
       ];
 
       for (const handle of validHandles) {
-        const result = AppObjectHandleSchema(handle);
-        expect(result).not.toBeInstanceOf(type.errors);
-        expect(result).toBe(handle);
+        const result = AppObjectHandleSchema.safeParse(handle);
+        expect(result.success).toBe(true);
+        if (result.success) expect(result.data).toBe(handle);
       }
     });
 
@@ -45,8 +45,8 @@ describe('Objects Schema Validation', () => {
       ];
 
       for (const handle of invalidHandles) {
-        const result = AppObjectHandleSchema(handle);
-        expect(result).toBeInstanceOf(type.errors);
+        const result = AppObjectHandleSchema.safeParse(handle);
+        expect(result.success).toBe(false);
       }
     });
   });
@@ -54,27 +54,27 @@ describe('Objects Schema Validation', () => {
   describe('AppObjectUrlSchema', () => {
     test('should handle URL objects correctly', () => {
       const url = new URL('https://example.com/object/{{id}}');
-      const result = AppObjectUrlSchema(url);
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
-      expect(result).toBeInstanceOf(URL);
-      expect(result?.toString()).toBe('https://example.com/object/%7B%7Bid%7D%7D');
+      const result = AppObjectUrlSchema.safeParse(url);
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data).toBeInstanceOf(URL);
+      expect(result.data?.toString()).toBe('https://example.com/object/%7B%7Bid%7D%7D');
     });
 
     test('should convert valid URL strings to URL objects', () => {
       const urlString = 'https://example.com/object/{{id}}';
-      const result = AppObjectUrlSchema(urlString);
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
-      expect(result).toBeInstanceOf(URL);
-      expect(result?.toString()).toBe('https://example.com/object/%7B%7Bid%7D%7D');
+      const result = AppObjectUrlSchema.safeParse(urlString);
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data).toBeInstanceOf(URL);
+      expect(result.data?.toString()).toBe('https://example.com/object/%7B%7Bid%7D%7D');
     });
 
     test('should handle undefined values', () => {
-      const result = AppObjectUrlSchema(undefined);
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
-      expect(result).toBeUndefined();
+      const result = AppObjectUrlSchema.safeParse(undefined);
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data).toBeUndefined();
     });
 
     test('should reject invalid URL strings', () => {
@@ -85,8 +85,8 @@ describe('Objects Schema Validation', () => {
       ];
 
       for (const invalidUrl of invalidUrls) {
-        const result = AppObjectUrlSchema(invalidUrl);
-        expect(result).toBeInstanceOf(type.errors);
+        const result = AppObjectUrlSchema.safeParse(invalidUrl);
+        expect(result.success).toBe(false);
       }
     });
 
@@ -99,11 +99,11 @@ describe('Objects Schema Validation', () => {
       ];
 
       for (const { input, expected } of urlsWithTokens) {
-        const result = AppObjectUrlSchema(input);
-        expect(result).not.toBeInstanceOf(type.errors);
-        if (result instanceof type.errors) continue;
-        expect(result).toBeInstanceOf(URL);
-        expect(result?.toString()).toBe(expected);
+        const result = AppObjectUrlSchema.safeParse(input);
+        expect(result.success).toBe(true);
+        if (!result.success) continue;
+        expect(result.data).toBeInstanceOf(URL);
+        expect(result.data?.toString()).toBe(expected);
       }
     });
   });
@@ -111,72 +111,72 @@ describe('Objects Schema Validation', () => {
   describe('AppObjectUrlStringSchema', () => {
     test('should convert URL objects to strings', () => {
       const url = new URL('https://example.com/object/{{id}}');
-      const result = AppObjectUrlStringSchema(url);
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
-      expect(result).toBe('https://example.com/object/{{id}}');
+      const result = AppObjectUrlStringSchema.safeParse(url);
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data).toBe('https://example.com/object/{{id}}');
     });
 
     test('should pass through valid URL strings', () => {
       const urlString = 'https://example.com/object/{{id}}';
-      const result = AppObjectUrlStringSchema(urlString);
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
-      expect(result).toBe(urlString);
+      const result = AppObjectUrlStringSchema.safeParse(urlString);
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data).toBe(urlString);
     });
 
     test('should handle undefined values', () => {
-      const result = AppObjectUrlStringSchema(undefined);
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
-      expect(result).toBeUndefined();
+      const result = AppObjectUrlStringSchema.safeParse(undefined);
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data).toBeUndefined();
     });
 
     test('should reject invalid URL strings', () => {
-      const result = AppObjectUrlStringSchema('not-a-url');
-      expect(result).toBeInstanceOf(type.errors);
+      const result = AppObjectUrlStringSchema.safeParse('not-a-url');
+      expect(result.success).toBe(false);
     });
 
     test('should normalize URLs with encoded tokens', () => {
       const encodedUrl = 'https://example.com/object/%7B%7Bid%7D%7D';
-      const result = AppObjectUrlStringSchema(encodedUrl);
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
-      expect(result).toBe('https://example.com/object/{{id}}');
+      const result = AppObjectUrlStringSchema.safeParse(encodedUrl);
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data).toBe('https://example.com/object/{{id}}');
     });
 
     test('should handle complex URLs with multiple tokens', () => {
       const complexUrl = 'https://example.com/{{type}}/{{id}}/details?param={{value}}';
-      const result = AppObjectUrlStringSchema(complexUrl);
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
-      expect(result).toBe(complexUrl);
+      const result = AppObjectUrlStringSchema.safeParse(complexUrl);
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data).toBe(complexUrl);
     });
 
     test('should normalize encoded tokens in complex URLs', () => {
       const encodedComplexUrl = 'https://example.com/%7B%7Btype%7D%7D/%7B%7Bid%7D%7D/details?param=%7B%7Bvalue%7D%7D';
-      const result = AppObjectUrlStringSchema(encodedComplexUrl);
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
-      expect(result).toBe('https://example.com/{{type}}/{{id}}/details?param={{value}}');
+      const result = AppObjectUrlStringSchema.safeParse(encodedComplexUrl);
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data).toBe('https://example.com/{{type}}/{{id}}/details?param={{value}}');
     });
   });
 
   describe('AppObjectSchema', () => {
     test('should validate complete valid app object data', () => {
       const validAppObject = TestDataFactory.validAppObject();
-      const result = AppObjectSchema(validAppObject);
+      const result = AppObjectSchema.safeParse(validAppObject);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.handle).toBe(validAppObject.handle);
-      expect(result.name).toBe(validAppObject.name);
-      expect(result.app).toEqual(validAppObject.app);
-      expect(result.url).toBeInstanceOf(URL);
-      expect(result.url?.toString()).toBe('https://example.com/object/%7B%7Bid%7D%7D');
-      expect(result.createdAt).toBeInstanceOf(Date);
-      expect(result.updatedAt).toBeInstanceOf(Date);
+      expect(result.data.handle).toBe(validAppObject.handle);
+      expect(result.data.name).toBe(validAppObject.name);
+      expect(result.data.app).toEqual(validAppObject.app);
+      expect(result.data.url).toBeInstanceOf(URL);
+      expect(result.data.url?.toString()).toBe('https://example.com/object/%7B%7Bid%7D%7D');
+      expect(result.data.createdAt).toBeInstanceOf(Date);
+      expect(result.data.updatedAt).toBeInstanceOf(Date);
     });
 
     test('should validate app object data without optional URL', () => {
@@ -188,17 +188,17 @@ describe('Objects Schema Validation', () => {
         updatedAt: new Date('2024-01-02T00:00:00.000Z').toISOString(),
       };
       
-      const result = AppObjectSchema(appObjectWithoutUrl);
+      const result = AppObjectSchema.safeParse(appObjectWithoutUrl);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.handle).toBe(appObjectWithoutUrl.handle);
-      expect(result.name).toBe(appObjectWithoutUrl.name);
-      expect(result.app).toEqual(appObjectWithoutUrl.app);
-      expect(result.url).toBeUndefined();
-      expect(result.createdAt).toBeInstanceOf(Date);
-      expect(result.updatedAt).toBeInstanceOf(Date);
+      expect(result.data.handle).toBe(appObjectWithoutUrl.handle);
+      expect(result.data.name).toBe(appObjectWithoutUrl.name);
+      expect(result.data.app).toEqual(appObjectWithoutUrl.app);
+      expect(result.data.url).toBeUndefined();
+      expect(result.data.createdAt).toBeInstanceOf(Date);
+      expect(result.data.updatedAt).toBeInstanceOf(Date);
     });
 
     test('should handle Date objects for date fields', () => {
@@ -210,15 +210,15 @@ describe('Objects Schema Validation', () => {
         updatedAt: new Date('2024-01-02T00:00:00.000Z'),
       };
       
-      const result = AppObjectSchema(appObjectWithDateObjects);
+      const result = AppObjectSchema.safeParse(appObjectWithDateObjects);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.createdAt).toBeInstanceOf(Date);
-      expect(result.updatedAt).toBeInstanceOf(Date);
-      expect(result.createdAt.toISOString()).toBe('2024-01-01T00:00:00.000Z');
-      expect(result.updatedAt.toISOString()).toBe('2024-01-02T00:00:00.000Z');
+      expect(result.data.createdAt).toBeInstanceOf(Date);
+      expect(result.data.updatedAt).toBeInstanceOf(Date);
+      expect(result.data.createdAt.toISOString()).toBe('2024-01-01T00:00:00.000Z');
+      expect(result.data.updatedAt.toISOString()).toBe('2024-01-02T00:00:00.000Z');
     });
 
     test('should reject app object data with missing required fields', () => {
@@ -227,8 +227,8 @@ describe('Objects Schema Validation', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      const result = AppObjectSchema(invalidAppObject);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = AppObjectSchema.safeParse(invalidAppObject);
+      expect(result.success).toBe(false);
     });
 
     test('should reject app object data with invalid handle', () => {
@@ -239,8 +239,8 @@ describe('Objects Schema Validation', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      const result = AppObjectSchema(invalidAppObject);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = AppObjectSchema.safeParse(invalidAppObject);
+      expect(result.success).toBe(false);
     });
 
     test('should reject app object data with invalid app handle reference', () => {
@@ -251,8 +251,8 @@ describe('Objects Schema Validation', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      const result = AppObjectSchema(invalidAppObject);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = AppObjectSchema.safeParse(invalidAppObject);
+      expect(result.success).toBe(false);
     });
 
     test('should reject app object data with invalid URL', () => {
@@ -264,8 +264,8 @@ describe('Objects Schema Validation', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      const result = AppObjectSchema(invalidAppObject);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = AppObjectSchema.safeParse(invalidAppObject);
+      expect(result.success).toBe(false);
     });
 
     test('should reject app object data with invalid date formats', () => {
@@ -276,25 +276,25 @@ describe('Objects Schema Validation', () => {
         createdAt: 'invalid-date',
         updatedAt: new Date().toISOString(),
       };
-      const result = AppObjectSchema(invalidAppObject);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = AppObjectSchema.safeParse(invalidAppObject);
+      expect(result.success).toBe(false);
     });
   });
 
   describe('AppObjectPayloadSchema', () => {
     test('should validate complete valid app object payload data', () => {
       const validAppObject = TestDataFactory.validAppObject();
-      const result = AppObjectPayloadSchema(validAppObject);
+      const result = AppObjectPayloadSchema.safeParse(validAppObject);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.handle).toBe(validAppObject.handle);
-      expect(result.name).toBe(validAppObject.name);
-      expect(result.app).toEqual(validAppObject.app);
-      expect(result.url).toBe(validAppObject.url);
-      expect(result.createdAt).toBe(validAppObject.createdAt);
-      expect(result.updatedAt).toBe(validAppObject.updatedAt);
+      expect(result.data.handle).toBe(validAppObject.handle);
+      expect(result.data.name).toBe(validAppObject.name);
+      expect(result.data.app).toEqual(validAppObject.app);
+      expect(result.data.url).toBe(validAppObject.url);
+      expect(result.data.createdAt).toBe(validAppObject.createdAt);
+      expect(result.data.updatedAt).toBe(validAppObject.updatedAt);
     });
 
     test('should convert URL objects to strings for url field', () => {
@@ -307,14 +307,14 @@ describe('Objects Schema Validation', () => {
         updatedAt: new Date('2024-01-02T00:00:00.000Z'),
       };
       
-      const result = AppObjectPayloadSchema(appObjectWithUrlObject);
+      const result = AppObjectPayloadSchema.safeParse(appObjectWithUrlObject);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.url).toBe('https://example.com/object/{{id}}');
-      expect(result.createdAt).toBe('2024-01-01T00:00:00.000Z');
-      expect(result.updatedAt).toBe('2024-01-02T00:00:00.000Z');
+      expect(result.data.url).toBe('https://example.com/object/{{id}}');
+      expect(result.data.createdAt).toBe('2024-01-01T00:00:00.000Z');
+      expect(result.data.updatedAt).toBe('2024-01-02T00:00:00.000Z');
     });
 
     test('should handle app object payload without optional URL', () => {
@@ -326,17 +326,17 @@ describe('Objects Schema Validation', () => {
         updatedAt: new Date('2024-01-02T00:00:00.000Z'),
       };
       
-      const result = AppObjectPayloadSchema(appObjectWithoutUrl);
+      const result = AppObjectPayloadSchema.safeParse(appObjectWithoutUrl);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.handle).toBe(appObjectWithoutUrl.handle);
-      expect(result.name).toBe(appObjectWithoutUrl.name);
-      expect(result.app).toEqual(appObjectWithoutUrl.app);
-      expect(result.url).toBeUndefined();
-      expect(result.createdAt).toBe('2024-01-01T00:00:00.000Z');
-      expect(result.updatedAt).toBe('2024-01-02T00:00:00.000Z');
+      expect(result.data.handle).toBe(appObjectWithoutUrl.handle);
+      expect(result.data.name).toBe(appObjectWithoutUrl.name);
+      expect(result.data.app).toEqual(appObjectWithoutUrl.app);
+      expect(result.data.url).toBeUndefined();
+      expect(result.data.createdAt).toBe('2024-01-01T00:00:00.000Z');
+      expect(result.data.updatedAt).toBe('2024-01-02T00:00:00.000Z');
     });
 
     test('should convert Date objects to ISO strings for date fields', () => {
@@ -348,13 +348,13 @@ describe('Objects Schema Validation', () => {
         updatedAt: new Date('2024-01-02T00:00:00.000Z'),
       };
       
-      const result = AppObjectPayloadSchema(appObjectWithDateObjects);
+      const result = AppObjectPayloadSchema.safeParse(appObjectWithDateObjects);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.createdAt).toBe('2024-01-01T00:00:00.000Z');
-      expect(result.updatedAt).toBe('2024-01-02T00:00:00.000Z');
+      expect(result.data.createdAt).toBe('2024-01-01T00:00:00.000Z');
+      expect(result.data.updatedAt).toBe('2024-01-02T00:00:00.000Z');
     });
 
     test('should reject payload with missing required fields', () => {
@@ -362,8 +362,8 @@ describe('Objects Schema Validation', () => {
         // Missing handle, name, and app
         url: 'https://example.com/object/{{id}}',
       };
-      const result = AppObjectPayloadSchema(invalidPayload);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = AppObjectPayloadSchema.safeParse(invalidPayload);
+      expect(result.success).toBe(false);
     });
 
     test('should reject payload with invalid handle format', () => {
@@ -374,8 +374,8 @@ describe('Objects Schema Validation', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      const result = AppObjectPayloadSchema(invalidPayload);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = AppObjectPayloadSchema.safeParse(invalidPayload);
+      expect(result.success).toBe(false);
     });
 
     test('should reject payload with invalid app handle reference', () => {
@@ -386,8 +386,8 @@ describe('Objects Schema Validation', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      const result = AppObjectPayloadSchema(invalidPayload);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = AppObjectPayloadSchema.safeParse(invalidPayload);
+      expect(result.success).toBe(false);
     });
 
     test('should normalize URLs with encoded tokens in payload', () => {
@@ -400,26 +400,26 @@ describe('Objects Schema Validation', () => {
         updatedAt: new Date('2024-01-02T00:00:00.000Z'),
       };
       
-      const result = AppObjectPayloadSchema(payloadWithEncodedUrl);
+      const result = AppObjectPayloadSchema.safeParse(payloadWithEncodedUrl);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.url).toBe('https://example.com/object/{{id}}');
+      expect(result.data.url).toBe('https://example.com/object/{{id}}');
     });
   });
 
   describe('InsertAppObjectPayloadSchema', () => {
     test('should validate complete valid insert app object payload', () => {
       const validInsertPayload = TestDataFactory.validInsertAppObjectPayload();
-      const result = InsertAppObjectPayloadSchema(validInsertPayload);
+      const result = InsertAppObjectPayloadSchema.safeParse(validInsertPayload);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.handle).toBe(validInsertPayload.handle);
-      expect(result.name).toBe(validInsertPayload.name);
-      expect(result.url).toBe(validInsertPayload.url);
+      expect(result.data.handle).toBe(validInsertPayload.handle);
+      expect(result.data.name).toBe(validInsertPayload.name);
+      expect(result.data.url).toBe(validInsertPayload.url);
     });
 
     test('should validate insert payload without optional URL', () => {
@@ -428,14 +428,14 @@ describe('Objects Schema Validation', () => {
         name: 'New Object',
       };
       
-      const result = InsertAppObjectPayloadSchema(insertPayloadWithoutUrl);
+      const result = InsertAppObjectPayloadSchema.safeParse(insertPayloadWithoutUrl);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.handle).toBe(insertPayloadWithoutUrl.handle);
-      expect(result.name).toBe(insertPayloadWithoutUrl.name);
-      expect(result.url).toBeUndefined();
+      expect(result.data.handle).toBe(insertPayloadWithoutUrl.handle);
+      expect(result.data.name).toBe(insertPayloadWithoutUrl.name);
+      expect(result.data.url).toBeUndefined();
     });
 
     test('should convert URL objects to strings for url field', () => {
@@ -445,12 +445,12 @@ describe('Objects Schema Validation', () => {
         url: new URL('https://example.com/new-object/{{id}}'),
       };
       
-      const result = InsertAppObjectPayloadSchema(insertPayloadWithUrlObject);
+      const result = InsertAppObjectPayloadSchema.safeParse(insertPayloadWithUrlObject);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.url).toBe('https://example.com/new-object/{{id}}');
+      expect(result.data.url).toBe('https://example.com/new-object/{{id}}');
     });
 
     test('should reject insert payload with missing required fields', () => {
@@ -458,8 +458,8 @@ describe('Objects Schema Validation', () => {
         // Missing handle and name
         url: 'https://example.com/object/{{id}}',
       };
-      const result = InsertAppObjectPayloadSchema(invalidInsertPayload);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = InsertAppObjectPayloadSchema.safeParse(invalidInsertPayload);
+      expect(result.success).toBe(false);
     });
 
     test('should reject insert payload with invalid handle format', () => {
@@ -467,8 +467,8 @@ describe('Objects Schema Validation', () => {
         handle: 'Invalid Handle!',
         name: 'Test Object',
       };
-      const result = InsertAppObjectPayloadSchema(invalidInsertPayload);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = InsertAppObjectPayloadSchema.safeParse(invalidInsertPayload);
+      expect(result.success).toBe(false);
     });
 
     test('should reject insert payload with invalid URL', () => {
@@ -477,8 +477,8 @@ describe('Objects Schema Validation', () => {
         name: 'New Object',
         url: 'not-a-valid-url',
       };
-      const result = InsertAppObjectPayloadSchema(invalidInsertPayload);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = InsertAppObjectPayloadSchema.safeParse(invalidInsertPayload);
+      expect(result.success).toBe(false);
     });
 
     test('should handle empty string name validation', () => {
@@ -486,10 +486,10 @@ describe('Objects Schema Validation', () => {
         handle: 'new-object',
         name: '', // Empty string is actually accepted by arktype string schema
       };
-      const result = InsertAppObjectPayloadSchema(insertPayloadWithEmptyName);
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
-      expect(result.name).toBe('');
+      const result = InsertAppObjectPayloadSchema.safeParse(insertPayloadWithEmptyName);
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data.name).toBe('');
     });
 
     test('should normalize URLs with encoded tokens in insert payload', () => {
@@ -499,25 +499,25 @@ describe('Objects Schema Validation', () => {
         url: 'https://example.com/object/%7B%7Bid%7D%7D',
       };
       
-      const result = InsertAppObjectPayloadSchema(insertPayloadWithEncodedUrl);
+      const result = InsertAppObjectPayloadSchema.safeParse(insertPayloadWithEncodedUrl);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.url).toBe('https://example.com/object/{{id}}');
+      expect(result.data.url).toBe('https://example.com/object/{{id}}');
     });
   });
 
   describe('UpdateAppObjectPayloadSchema', () => {
     test('should validate complete valid update app object payload', () => {
       const validUpdatePayload = TestDataFactory.validUpdateAppObjectPayload();
-      const result = UpdateAppObjectPayloadSchema(validUpdatePayload);
+      const result = UpdateAppObjectPayloadSchema.safeParse(validUpdatePayload);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.name).toBe(validUpdatePayload.name);
-      expect(result.url).toBe(validUpdatePayload.url);
+      expect(result.data.name).toBe(validUpdatePayload.name);
+      expect(result.data.url).toBe(validUpdatePayload.url);
     });
 
     test('should validate update payload with only name', () => {
@@ -525,13 +525,13 @@ describe('Objects Schema Validation', () => {
         name: 'Updated Object Name',
       };
       
-      const result = UpdateAppObjectPayloadSchema(updatePayloadNameOnly);
+      const result = UpdateAppObjectPayloadSchema.safeParse(updatePayloadNameOnly);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.name).toBe(updatePayloadNameOnly.name);
-      expect(result.url).toBeUndefined();
+      expect(result.data.name).toBe(updatePayloadNameOnly.name);
+      expect(result.data.url).toBeUndefined();
     });
 
     test('should validate update payload with only URL', () => {
@@ -539,25 +539,25 @@ describe('Objects Schema Validation', () => {
         url: 'https://example.com/updated-object/{{id}}',
       };
       
-      const result = UpdateAppObjectPayloadSchema(updatePayloadUrlOnly);
+      const result = UpdateAppObjectPayloadSchema.safeParse(updatePayloadUrlOnly);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.name).toBeUndefined();
-      expect(result.url).toBe(updatePayloadUrlOnly.url);
+      expect(result.data.name).toBeUndefined();
+      expect(result.data.url).toBe(updatePayloadUrlOnly.url);
     });
 
     test('should validate empty update payload (all fields optional)', () => {
       const emptyUpdatePayload = {};
       
-      const result = UpdateAppObjectPayloadSchema(emptyUpdatePayload);
+      const result = UpdateAppObjectPayloadSchema.safeParse(emptyUpdatePayload);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.name).toBeUndefined();
-      expect(result.url).toBeUndefined();
+      expect(result.data.name).toBeUndefined();
+      expect(result.data.url).toBeUndefined();
     });
 
     test('should convert URL objects to strings for url field', () => {
@@ -566,12 +566,12 @@ describe('Objects Schema Validation', () => {
         url: new URL('https://example.com/updated-object/{{id}}'),
       };
       
-      const result = UpdateAppObjectPayloadSchema(updatePayloadWithUrlObject);
+      const result = UpdateAppObjectPayloadSchema.safeParse(updatePayloadWithUrlObject);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.url).toBe('https://example.com/updated-object/{{id}}');
+      expect(result.data.url).toBe('https://example.com/updated-object/{{id}}');
     });
 
     test('should reject update payload with invalid URL', () => {
@@ -579,18 +579,18 @@ describe('Objects Schema Validation', () => {
         name: 'Updated Object',
         url: 'not-a-valid-url',
       };
-      const result = UpdateAppObjectPayloadSchema(invalidUpdatePayload);
-      expect(result).toBeInstanceOf(type.errors);
+      const result = UpdateAppObjectPayloadSchema.safeParse(invalidUpdatePayload);
+      expect(result.success).toBe(false);
     });
 
     test('should accept empty string name (arktype allows empty strings)', () => {
       const updatePayloadWithEmptyName = {
         name: '', // Empty string is actually accepted by arktype string schema
       };
-      const result = UpdateAppObjectPayloadSchema(updatePayloadWithEmptyName);
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
-      expect(result.name).toBe('');
+      const result = UpdateAppObjectPayloadSchema.safeParse(updatePayloadWithEmptyName);
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data.name).toBe('');
     });
 
     test('should normalize URLs with encoded tokens in update payload', () => {
@@ -599,12 +599,12 @@ describe('Objects Schema Validation', () => {
         url: 'https://example.com/object/%7B%7Bid%7D%7D',
       };
       
-      const result = UpdateAppObjectPayloadSchema(updatePayloadWithEncodedUrl);
+      const result = UpdateAppObjectPayloadSchema.safeParse(updatePayloadWithEncodedUrl);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
-      expect(result.url).toBe('https://example.com/object/{{id}}');
+      expect(result.data.url).toBe('https://example.com/object/{{id}}');
     });
 
     test('should handle null values for optional fields', () => {
@@ -614,15 +614,15 @@ describe('Objects Schema Validation', () => {
       };
       
       // Test the actual behavior - arktype might handle nulls differently
-      const result = UpdateAppObjectPayloadSchema(updatePayloadWithNulls);
+      const result = UpdateAppObjectPayloadSchema.safeParse(updatePayloadWithNulls);
       
-      if (result instanceof type.errors) {
+      if (!result.success) {
         // If it throws, that's acceptable behavior for null handling
-        expect(result).toBeInstanceOf(type.errors);
+        expect(result.success).toBe(false);
       } else {
         // If it succeeds, nulls should be converted to undefined
-        expect(result.name).toBeUndefined();
-        expect(result.url).toBeUndefined();
+        expect(result.data.name).toBeUndefined();
+        expect(result.data.url).toBeUndefined();
       }
     });
   });
@@ -632,47 +632,47 @@ describe('Objects Schema Validation', () => {
       const complexUrl = 'https://example.com/object/{{id}}?size=large&format=webp#main';
       const expectedEncodedUrl = 'https://example.com/object/%7B%7Bid%7D%7D?size=large&format=webp#main';
       
-      const urlResult = AppObjectUrlSchema(complexUrl);
-      expect(urlResult).not.toBeInstanceOf(type.errors);
-      if (urlResult instanceof type.errors) return;
-      expect(urlResult).toBeInstanceOf(URL);
-      expect(urlResult?.toString()).toBe(expectedEncodedUrl);
+      const urlResult = AppObjectUrlSchema.safeParse(complexUrl);
+      expect(urlResult.success).toBe(true);
+      if (!urlResult.success) return;
+      expect(urlResult.data).toBeInstanceOf(URL);
+      expect(urlResult.data?.toString()).toBe(expectedEncodedUrl);
       
-      const stringResult = AppObjectUrlStringSchema(complexUrl);
-      expect(stringResult).not.toBeInstanceOf(type.errors);
-      if (stringResult instanceof type.errors) return;
-      expect(stringResult).toBe(complexUrl);
+      const stringResult = AppObjectUrlStringSchema.safeParse(complexUrl);
+      expect(stringResult.success).toBe(true);
+      if (!stringResult.success) return;
+      expect(stringResult.data).toBe(complexUrl);
     });
 
     test('should handle URL with special characters', () => {
       const urlWithSpecialChars = 'https://example.com/object%20with%20spaces/{{id}}';
       
-      const urlResult = AppObjectUrlSchema(urlWithSpecialChars);
-      expect(urlResult).not.toBeInstanceOf(type.errors);
-      if (urlResult instanceof type.errors) return;
-      expect(urlResult).toBeInstanceOf(URL);
+      const urlResult = AppObjectUrlSchema.safeParse(urlWithSpecialChars);
+      expect(urlResult.success).toBe(true);
+      if (!urlResult.success) return;
+      expect(urlResult.data).toBeInstanceOf(URL);
       
-      const stringResult = AppObjectUrlStringSchema(urlWithSpecialChars);
-      expect(stringResult).not.toBeInstanceOf(type.errors);
-      if (stringResult instanceof type.errors) return;
-      expect(stringResult).toBe(urlWithSpecialChars);
+      const stringResult = AppObjectUrlStringSchema.safeParse(urlWithSpecialChars);
+      expect(stringResult.success).toBe(true);
+      if (!stringResult.success) return;
+      expect(stringResult.data).toBe(urlWithSpecialChars);
     });
 
     test('should handle HTTPS and HTTP protocols', () => {
       const httpsUrl = 'https://example.com/object/{{id}}';
       const httpUrl = 'http://example.com/object/{{id}}';
       
-      const httpsResult = AppObjectUrlSchema(httpsUrl);
-      expect(httpsResult).not.toBeInstanceOf(type.errors);
-      if (httpsResult instanceof type.errors) return;
-      expect(httpsResult).toBeInstanceOf(URL);
-      expect(httpsResult?.protocol).toBe('https:');
+      const httpsResult = AppObjectUrlSchema.safeParse(httpsUrl);
+      expect(httpsResult.success).toBe(true);
+      if (!httpsResult.success) return;
+      expect(httpsResult.data).toBeInstanceOf(URL);
+      expect(httpsResult.data?.protocol).toBe('https:');
       
-      const httpResult = AppObjectUrlSchema(httpUrl);
-      expect(httpResult).not.toBeInstanceOf(type.errors);
-      if (httpResult instanceof type.errors) return;
-      expect(httpResult).toBeInstanceOf(URL);
-      expect(httpResult?.protocol).toBe('http:');
+      const httpResult = AppObjectUrlSchema.safeParse(httpUrl);
+      expect(httpResult.success).toBe(true);
+      if (!httpResult.success) return;
+      expect(httpResult.data).toBeInstanceOf(URL);
+      expect(httpResult.data?.protocol).toBe('http:');
     });
 
     test('should handle multiple token placeholders in URLs', () => {
@@ -683,16 +683,16 @@ describe('Objects Schema Validation', () => {
       ];
 
       for (const { input, expectedEncoded } of multiTokenUrls) {
-        const urlResult = AppObjectUrlSchema(input);
-        expect(urlResult).not.toBeInstanceOf(type.errors);
-        if (urlResult instanceof type.errors) continue;
-        expect(urlResult).toBeInstanceOf(URL);
-        expect(urlResult?.toString()).toBe(expectedEncoded);
+        const urlResult = AppObjectUrlSchema.safeParse(input);
+        expect(urlResult.success).toBe(true);
+        if (!urlResult.success) continue;
+        expect(urlResult.data).toBeInstanceOf(URL);
+        expect(urlResult.data?.toString()).toBe(expectedEncoded);
 
-        const stringResult = AppObjectUrlStringSchema(input);
-        expect(stringResult).not.toBeInstanceOf(type.errors);
-        if (stringResult instanceof type.errors) continue;
-        expect(stringResult).toBe(input);
+        const stringResult = AppObjectUrlStringSchema.safeParse(input);
+        expect(stringResult.success).toBe(true);
+        if (!stringResult.success) continue;
+        expect(stringResult.data).toBe(input);
       }
     });
 
@@ -700,10 +700,10 @@ describe('Objects Schema Validation', () => {
       const mixedUrl = 'https://example.com/{{type}}/%7B%7Bid%7D%7D/details';
       const expectedUrl = 'https://example.com/{{type}}/{{id}}/details';
       
-      const stringResult = AppObjectUrlStringSchema(mixedUrl);
-      expect(stringResult).not.toBeInstanceOf(type.errors);
-      if (stringResult instanceof type.errors) return;
-      expect(stringResult).toBe(expectedUrl);
+      const stringResult = AppObjectUrlStringSchema.safeParse(mixedUrl);
+      expect(stringResult.success).toBe(true);
+      if (!stringResult.success) return;
+      expect(stringResult.data).toBe(expectedUrl);
     });
   });
 
@@ -725,13 +725,13 @@ describe('Objects Schema Validation', () => {
           updatedAt: dateString,
         };
         
-        const result = AppObjectSchema(appObjectData);
-        expect(result).not.toBeInstanceOf(type.errors);
-        if (result instanceof type.errors) continue;
+        const result = AppObjectSchema.safeParse(appObjectData);
+        expect(result.success).toBe(true);
+        if (!result.success) continue;
         
-        expect(result.createdAt).toBeInstanceOf(Date);
-        expect(result.updatedAt).toBeInstanceOf(Date);
-        expect(result.createdAt.toISOString()).toBe(new Date(dateString).toISOString());
+        expect(result.data.createdAt).toBeInstanceOf(Date);
+        expect(result.data.updatedAt).toBeInstanceOf(Date);
+        expect(result.data.createdAt.toISOString()).toBe(new Date(dateString).toISOString());
       }
     });
 
@@ -751,8 +751,8 @@ describe('Objects Schema Validation', () => {
           updatedAt: new Date().toISOString(),
         };
         
-        const result = AppObjectSchema(appObjectData);
-        expect(result).toBeInstanceOf(type.errors);
+        const result = AppObjectSchema.safeParse(appObjectData);
+        expect(result.success).toBe(false);
       }
     });
 
@@ -773,13 +773,13 @@ describe('Objects Schema Validation', () => {
           updatedAt: new Date().toISOString(),
         };
         
-        const result = AppObjectSchema(appObjectData);
+        const result = AppObjectSchema.safeParse(appObjectData);
         // These might be accepted or rejected depending on JavaScript's Date parsing
         // We just test that the schema behaves consistently
-        if (result instanceof type.errors) {
-          expect(result).toBeInstanceOf(type.errors);
+        if (!result.success) {
+          expect(result.success).toBe(false);
         } else {
-          expect(result.createdAt).toBeInstanceOf(Date);
+          expect(result.data.createdAt).toBeInstanceOf(Date);
         }
       }
     });
@@ -788,18 +788,18 @@ describe('Objects Schema Validation', () => {
   describe('Type inference validation', () => {
     test('should properly infer types for AppObjectSchema', () => {
       const validAppObject = TestDataFactory.validAppObject();
-      const result = AppObjectSchema(validAppObject);
+      const result = AppObjectSchema.safeParse(validAppObject);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
       // TypeScript type checking - these should not cause compilation errors
-      const handle: string = result.handle;
-      const name: string = result.name;
-      const app: { handle: string; name: string } = result.app;
-      const url: URL | undefined = result.url;
-      const createdAt: Date = result.createdAt;
-      const updatedAt: Date = result.updatedAt;
+      const handle: string = result.data.handle;
+      const name: string = result.data.name;
+      const app: { handle: string; name: string } = result.data.app;
+      const url: URL | undefined = result.data.url;
+      const createdAt: Date = result.data.createdAt;
+      const updatedAt: Date = result.data.updatedAt;
       
       expect(typeof handle).toBe('string');
       expect(typeof name).toBe('string');
@@ -813,15 +813,15 @@ describe('Objects Schema Validation', () => {
 
     test('should properly infer types for payload schemas', () => {
       const validPayload = TestDataFactory.validInsertAppObjectPayload();
-      const result = InsertAppObjectPayloadSchema(validPayload);
+      const result = InsertAppObjectPayloadSchema.safeParse(validPayload);
       
-      expect(result).not.toBeInstanceOf(type.errors);
-      if (result instanceof type.errors) return;
+      expect(result.success).toBe(true);
+      if (!result.success) return;
       
       // TypeScript type checking
-      const handle: string = result.handle;
-      const name: string = result.name;
-      const url: string | undefined = result.url;
+      const handle: string = result.data.handle;
+      const name: string = result.data.name;
+      const url: string | undefined = result.data.url;
       
       expect(typeof handle).toBe('string');
       expect(typeof name).toBe('string');
@@ -850,10 +850,10 @@ describe('Objects Schema Validation', () => {
           updatedAt: new Date().toISOString(),
         };
         
-        const result = AppObjectSchema(appObjectData);
-        expect(result).not.toBeInstanceOf(type.errors);
-        if (result instanceof type.errors) continue;
-        expect(result.app.handle).toBe(appHandle);
+        const result = AppObjectSchema.safeParse(appObjectData);
+        expect(result.success).toBe(true);
+        if (!result.success) continue;
+        expect(result.data.app.handle).toBe(appHandle);
       }
     });
 
@@ -879,8 +879,8 @@ describe('Objects Schema Validation', () => {
           updatedAt: new Date().toISOString(),
         };
         
-        const result = AppObjectSchema(appObjectData);
-        expect(result).toBeInstanceOf(type.errors);
+        const result = AppObjectSchema.safeParse(appObjectData);
+        expect(result.success).toBe(false);
       }
     });
   });

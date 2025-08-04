@@ -1,114 +1,121 @@
-import { type } from 'arktype';
+import { z } from 'zod';
 import { describe, expect, test } from 'vitest';
 import { optionallyNullish, optionallyNullishToUndefined, optionallyUndefined } from './schema.js';
 
 describe('Common Schema', () => {
   describe('optionallyNullishToUndefined', () => {
     test('should parse null string successfully', async () => {
-      const Schema = type({
-        foo: optionallyNullishToUndefined(type('string')),
+      const Schema = z.object({
+        foo: optionallyNullishToUndefined(z.string()),
       });
 
-      const result = Schema.assert({
+      const result = Schema.safeParse({
         foo: null,
       });
 
-      if (result instanceof type.errors) {
-        console.log(result.summary);
+      if (!result.success) {
+        console.log(result.error);
       }
 
-      expect(result).not.toBeInstanceOf(type.errors);
-      expect(result.foo).toBeUndefined();
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data.foo).toBeUndefined();
     });
 
     test('should parse undefined string successfully', async () => {
-      const Schema = type({
-        foo: optionallyNullishToUndefined(type('string')),
+      const Schema = z.object({
+        foo: optionallyNullishToUndefined(z.string()),
       });
 
-      const result = Schema.assert({
+      const result = Schema.safeParse({
         foo: undefined,
       });
 
-      if (result instanceof type.errors) {
-        console.log(result.summary);
+      if (!result.success) {
+        console.log(result.error);
       }
 
-      expect(result).not.toBeInstanceOf(type.errors);
-      expect(result.foo).toBeUndefined();
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data.foo).toBeUndefined();
     });
 
     test('should parse valid string successfully', async () => {
-      const Schema = type({
-        foo: optionallyNullishToUndefined(type('string')),
+      const Schema = z.object({
+        foo: optionallyNullishToUndefined(z.string()),
       });
 
-      const result = Schema.assert({
+      const result = Schema.safeParse({
         foo: 'valid-string',
       });
 
-      if (result instanceof type.errors) {
-        console.log(result.summary);
+      if (!result.success) {
+        console.log(result.error);
       }
 
-      expect(result).not.toBeInstanceOf(type.errors);
-      expect(result.foo).toBe('valid-string');
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data.foo).toBe('valid-string');
     });
   });
 
   describe('optionallyNullish', () => {
     test('should handle null values', () => {
-      const Schema = type({
-        foo: optionallyNullish(type('string')),
+      const Schema = z.object({
+        foo: optionallyNullish(z.string()),
       });
 
-      const result = Schema.assert({
+      const result = Schema.safeParse({
         foo: null,
       });
 
-      expect(result).not.toBeInstanceOf(type.errors);
-      expect(result.foo).toBeNull();
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data.foo).toBeNull();
     });
 
     test('should handle undefined values', () => {
-      const Schema = type({
-        foo: optionallyNullish(type('string')),
+      const Schema = z.object({
+        foo: optionallyNullish(z.string()),
       });
 
-      const result = Schema.assert({
+      const result = Schema.safeParse({
         foo: undefined,
       });
 
-      expect(result).not.toBeInstanceOf(type.errors);
-      expect(result.foo).toBeUndefined();
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data.foo).toBeUndefined();
     });
   });
 
   describe('optionallyUndefined', () => {
     test('should handle undefined values', () => {
-      const Schema = type({
-        foo: optionallyUndefined(type('string')),
+      const Schema = z.object({
+        foo: optionallyUndefined(z.string()),
       });
 
-      const result = Schema.assert({
+      const result = Schema.safeParse({
         foo: undefined,
       });
 
-      expect(result).not.toBeInstanceOf(type.errors);
-      expect(result.foo).toBeUndefined();
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data.foo).toBeUndefined();
     });
 
     test('should handle valid string values', () => {
-      const Schema = type({
-        foo: optionallyUndefined(type('string')),
+      const Schema = z.object({
+        foo: optionallyUndefined(z.string()),
       });
 
-      const result = Schema.assert({
+      const result = Schema.safeParse({
         foo: 'test',
       });
 
-      expect(result).not.toBeInstanceOf(type.errors);
-      expect(result.foo).toBe('test');
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data.foo).toBe('test');
     });
   });
 });

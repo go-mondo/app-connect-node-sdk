@@ -1,25 +1,27 @@
-import { type } from 'arktype';
+import { z } from 'zod';
 import { describe, expect, test } from 'vitest';
 import { OptionalDatePayloadSchema, RequiredDatePayloadSchema, RequiredDateSchema } from './dates.js';
 
 describe('Common - Dates', () => {
   describe('Date Schema', () => {
     test('should accept an iso string', async () => {
-      const result = RequiredDateSchema(
+      const result = RequiredDateSchema.safeParse(
         new Date().toISOString()
-      ) as typeof RequiredDateSchema.inferOut;
+      );
 
-      expect(result).not.toBeInstanceOf(type.errors);
-      expect(result).toBeInstanceOf(Date);
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data).toBeInstanceOf(Date);
     });
 
     test('should accept a Date object', async () => {
-      const result = RequiredDateSchema(
+      const result = RequiredDateSchema.safeParse(
         new Date()
-      ) as typeof RequiredDateSchema.inferOut;
+      );
 
-      expect(result).not.toBeInstanceOf(type.errors);
-      expect(result).toBeInstanceOf(Date);
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data).toBeInstanceOf(Date);
     });
   });
 
@@ -27,42 +29,46 @@ describe('Common - Dates', () => {
     test('should parse a Date to an ISO string', async () => {
       const iso = new Date().toISOString();
 
-      const result = RequiredDatePayloadSchema(
+      const result = RequiredDatePayloadSchema.safeParse(
         new Date(iso)
-      ) as typeof RequiredDatePayloadSchema.inferOut;
+      );
 
-      expect(result).not.toBeInstanceOf(type.errors);
-      expect(result).to.equal(iso);
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data).toBe(iso);
     });
 
     test('should parse an ISO to an ISO string', async () => {
       const iso = new Date().toISOString();
 
-      const result = RequiredDatePayloadSchema(
+      const result = RequiredDatePayloadSchema.safeParse(
         iso
-      ) as typeof RequiredDatePayloadSchema.inferOut;
+      );
 
-      expect(result).not.toBeInstanceOf(type.errors);
-      expect(result).to.equal(iso);
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data).toBe(iso);
     });
 
     test('should handle undefined in OptionalDatePayloadSchema', async () => {
-      const result = OptionalDatePayloadSchema(
+      const result = OptionalDatePayloadSchema.safeParse(
         undefined
-      ) as typeof OptionalDatePayloadSchema.inferOut;
+      );
 
-      expect(result).not.toBeInstanceOf(type.errors);
-      expect(result).toBeUndefined();
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data).toBeUndefined();
     });
 
     test('should handle valid date in OptionalDatePayloadSchema', async () => {
       const testDate = new Date('2024-01-01T00:00:00.000Z');
-      const result = OptionalDatePayloadSchema(
+      const result = OptionalDatePayloadSchema.safeParse(
         testDate
-      ) as typeof OptionalDatePayloadSchema.inferOut;
+      );
 
-      expect(result).not.toBeInstanceOf(type.errors);
-      expect(result).toBe('2024-01-01T00:00:00.000Z');
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data).toBe('2024-01-01T00:00:00.000Z');
     });
   });
 });

@@ -1,8 +1,8 @@
-import { type } from "arktype";
+import { z } from "zod";
 
-export const PaginationSchema = type({
-	pageSize: type("string | number | null | undefined").optional(),
-	nextToken: type("string | null | undefined").optional(),
+export const PaginationSchema = z.object({
+	pageSize: z.union([z.string(), z.number()]).nullable().optional(),
+	nextToken: z.string().nullable().optional(),
 });
 
-export type Pagination = typeof PaginationSchema.inferOut;
+export type Pagination = z.output<typeof PaginationSchema>;
