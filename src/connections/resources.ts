@@ -21,7 +21,7 @@ import {
 	UpsertConnectionPayloadSchema,
 } from "./schema.js";
 
-export const PATH = "/v1/connections";
+const PATH = "/v1/connections";
 
 export class ConnectionResources {
 	public constructor(private readonly instance: MondoAppConnect) {}

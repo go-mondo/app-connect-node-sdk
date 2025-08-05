@@ -12,7 +12,6 @@ import type { Authorization } from '../common/resources/authorization.js';
 import { MockHelpers, TestDataFactory, TestSetup } from '../common/test-utils.js';
 import {
   ConnectionResources,
-  PATH,
   associateConnection,
   dissociateConnection,
   listConnectionsBySource,
@@ -108,15 +107,6 @@ describe('Connections Resources', () => {
 
         expect(result).toBe('/v1/connections/test-app/test-object/id-with-special@chars.123');
       });
-
-      test('should use the correct PATH constant', () => {
-        expect(PATH).toBe('/v1/connections');
-        
-        const source = validSource;
-        const result = ConnectionResources.buildPath(source);
-        
-        expect(result.startsWith(PATH)).toBe(true);
-      });
     });
 
     describe('listItemsBySource method', () => {
@@ -158,7 +148,7 @@ describe('Connections Resources', () => {
         }));
         expect(result.items[0].updatedAt).toBeInstanceOf(Date);
         expect(result.pagination?.nextToken).toBeTypeOf('string');
-        
+
         // Verify URL includes pagination parameters
         const fetchCall = mockFetch.mock.calls[0];
         const calledUrl = fetchCall[0] as URL;
@@ -191,7 +181,7 @@ describe('Connections Resources', () => {
           object: validConnection.object,
           id: validConnection.id,
         }));
-        
+
         expect(mockFetch).toHaveBeenCalledWith(
           new URL('/v1/connections/test-app/test-object/test-id-123', mockInstance.config.host),
           expect.objectContaining({
@@ -231,7 +221,7 @@ describe('Connections Resources', () => {
           object: validConnection.object,
           id: validConnection.id,
         }));
-        
+
         expect(mockFetch).toHaveBeenCalledWith(
           new URL('/v1/connections/test-app/test-object/test-id-123', mockInstance.config.host),
           expect.objectContaining({
@@ -301,7 +291,7 @@ describe('Connections Resources', () => {
     test('should handle pagination parameters correctly', async () => {
       const pagination = { nextToken: 'next-page-token', pageSize: 25 };
       const mockResponse = {
-        items: [validConnection],  
+        items: [validConnection],
         pagination: { nextToken: 'another-page-token', pageSize: 25 }
       };
       mockFetch.mockResolvedValueOnce(MockHelpers.createMockResponse(mockResponse));
@@ -316,7 +306,7 @@ describe('Connections Resources', () => {
       }));
       expect(result.items[0].updatedAt).toBeInstanceOf(Date);
       expect(result.pagination?.nextToken).toBeTypeOf('string');
-      
+
       // Verify pagination parameters are added to URL
       const fetchCall = mockFetch.mock.calls[0];
       const calledUrl = fetchCall[0] as URL;
@@ -441,7 +431,7 @@ describe('Connections Resources', () => {
         extraField: 'should-be-removed',
         anotherExtra: 123,
       };
-      
+
       mockFetch.mockResolvedValueOnce(MockHelpers.createMockResponse(validConnection));
 
       await associateConnection(mockInstance, validSource, payloadWithExtraFields);
@@ -549,7 +539,7 @@ describe('Connections Resources', () => {
         extraField: 'should-be-removed',
         anotherExtra: 123,
       };
-      
+
       mockFetch.mockResolvedValueOnce(MockHelpers.createMockResponse(validConnection));
 
       await dissociateConnection(mockInstance, validSource, payloadWithExtraFields);
@@ -618,7 +608,7 @@ describe('Connections Resources', () => {
 
       // Associate connection
       mockFetch.mockResolvedValueOnce(MockHelpers.createMockResponse(validConnection));
-      
+
       const associatedConnection = await connectionResources.associateItem(validSource, validUpsertPayload);
       expect(associatedConnection).toEqual(expect.objectContaining({
         app: validConnection.app,
@@ -635,7 +625,7 @@ describe('Connections Resources', () => {
 
       // Dissociate connection
       mockFetch.mockResolvedValueOnce(MockHelpers.createMockResponse(validConnection));
-      
+
       const dissociatedConnection = await connectionResources.dissociateItem(validSource, validUpsertPayload);
       expect(dissociatedConnection).toEqual(expect.objectContaining({
         app: validConnection.app,
@@ -653,15 +643,15 @@ describe('Connections Resources', () => {
 
       for (const source of differentSources) {
         mockFetch.mockResolvedValueOnce(MockHelpers.createMockResponse(MockHelpers.createPaginatedResponse([])));
-        
+
         await connectionResources.listItemsBySource(source);
-        
+
         const expectedPath = `/v1/connections/${source.app}/${source.object}/${source.id}`;
         expect(mockFetch).toHaveBeenCalledWith(
           new URL(expectedPath, mockInstance.config.host),
           expect.any(Object)
         );
-        
+
         vi.clearAllMocks();
       }
     });
@@ -679,9 +669,9 @@ describe('Connections Resources', () => {
         } else {
           mockFetch.mockResolvedValueOnce(MockHelpers.createMockResponse(validConnection));
         }
-        
+
         await operation();
-        
+
         expect(mockAuthorization).toHaveBeenCalled();
         vi.clearAllMocks();
       }
