@@ -7,6 +7,7 @@ import {
 import {
 	addPaginationToURL,
 	parseEgressSchema,
+	parseIngressSchema,
 } from "../common/resources/utils.js";
 import {
 	type PaginationCollection,
@@ -18,6 +19,7 @@ import {
 	ConnectionPayloadSchema,
 	type Source,
 	type UpsertConnectionInput,
+	type UpsertConnectionPayload,
 	UpsertConnectionPayloadSchema,
 } from "./schema.js";
 
@@ -26,15 +28,11 @@ const PATH = "/v1/connections";
 export class ConnectionResources {
 	public constructor(private readonly instance: MondoAppConnect) {}
 
-	static buildPath(source: Source): string {
-		return [PATH, source.app, source.object, source.id].join("/");
-	}
-
-	public listItemsBySource(
+	public listItems(
 		source: Source,
 		pagination?: Pagination,
 	): Promise<PaginationCollection<ConnectionPayload>> {
-		return listConnectionsBySource(this.instance, source, pagination);
+		return listConnections(this.instance, source, pagination);
 	}
 
 	public associateItem(
@@ -52,19 +50,57 @@ export class ConnectionResources {
 	}
 }
 
-export async function listConnectionsBySource(
+export function buildConnectionListingURL(
+	instance: MondoAppConnect,
+	source: Source,
+	pagination?: Pagination,
+): URL {
+	return addPaginationToURL(
+		new URL(
+			`${PATH}/${source.app}/${source.object}/${source.id}`,
+			instance.config.host,
+		),
+		pagination,
+	);
+}
+
+export function buildConnectionItemURL(
+	instance: MondoAppConnect,
+	source: Source,
+): URL {
+	return new URL(
+		`${PATH}/${source.app}/${source.object}/${source.id}`,
+		instance.config.host,
+	);
+}
+
+export function parseConnectionListingResponse(
+	data: unknown,
+): PaginationCollection<ConnectionPayload> {
+	return parseEgressSchema(
+		PaginationCollectionSchema(ConnectionPayloadSchema).safeParse(data),
+	);
+}
+
+export function parseConnectionItemResponse(data: unknown): ConnectionPayload {
+	return parseEgressSchema(ConnectionPayloadSchema.safeParse(data));
+}
+
+export function parseConnectionUpsertPayload(
+	data: unknown,
+): UpsertConnectionPayload {
+	return parseIngressSchema(UpsertConnectionPayloadSchema.safeParse(data));
+}
+
+export async function listConnections(
 	instance: MondoAppConnect,
 	source: Source,
 	pagination?: Pagination,
 ): Promise<PaginationCollection<ConnectionPayload>> {
-	const url = addPaginationToURL(
-		new URL(ConnectionResources.buildPath(source), instance.config.host),
-		pagination,
-	);
-
-	return parseEgressSchema(
-		PaginationCollectionSchema(ConnectionPayloadSchema).safeParse(
-			await getItemWithAuthorization(url, instance.authorizer),
+	return parseConnectionListingResponse(
+		await getItemWithAuthorization(
+			buildConnectionListingURL(instance, source, pagination),
+			instance.authorizer,
 		),
 	);
 }
@@ -74,13 +110,11 @@ export async function associateConnection(
 	source: Source,
 	item: UpsertConnectionInput,
 ): Promise<ConnectionPayload> {
-	return parseEgressSchema(
-		ConnectionPayloadSchema.safeParse(
-			await putItemWithAuthorization(
-				new URL(ConnectionResources.buildPath(source), instance.config.host),
-				instance.authorizer,
-				parseEgressSchema(UpsertConnectionPayloadSchema.safeParse(item)),
-			),
+	return parseConnectionItemResponse(
+		await putItemWithAuthorization(
+			buildConnectionItemURL(instance, source),
+			instance.authorizer,
+			parseConnectionUpsertPayload(item),
 		),
 	);
 }
@@ -90,13 +124,11 @@ export async function dissociateConnection(
 	source: Source,
 	item: UpsertConnectionInput,
 ): Promise<ConnectionPayload> {
-	return parseEgressSchema(
-		ConnectionPayloadSchema.safeParse(
-			await deleteItemWithAuthorization(
-				new URL(ConnectionResources.buildPath(source), instance.config.host),
-				instance.authorizer,
-				parseEgressSchema(UpsertConnectionPayloadSchema.safeParse(item)),
-			),
+	return parseConnectionItemResponse(
+		await deleteItemWithAuthorization(
+			buildConnectionItemURL(instance, source),
+			instance.authorizer,
+			parseConnectionUpsertPayload(item),
 		),
 	);
 }

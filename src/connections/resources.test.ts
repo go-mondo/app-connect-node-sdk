@@ -14,7 +14,7 @@ import {
   ConnectionResources,
   associateConnection,
   dissociateConnection,
-  listConnectionsBySource,
+  listConnections,
 } from './resources.js';
 
 describe('Connections Resources', () => {
@@ -61,60 +61,14 @@ describe('Connections Resources', () => {
       connectionResources = new ConnectionResources(mockInstance);
     });
 
-    describe('buildPath static method', () => {
-      test('should build correct path with source parameters', () => {
-        const source = {
-          app: 'my-app',
-          object: 'my-object',
-          id: 'my-id-456',
-        };
 
-        const result = ConnectionResources.buildPath(source);
-
-        expect(result).toBe('/v1/connections/my-app/my-object/my-id-456');
-      });
-
-      test('should handle various source parameter formats', () => {
-        const testCases = [
-          {
-            source: { app: 'simple-app', object: 'simple-object', id: 'simple-id' },
-            expected: '/v1/connections/simple-app/simple-object/simple-id',
-          },
-          {
-            source: { app: 'complex-app-name', object: 'complex-object-name', id: 'uuid-123e4567-e89b-12d3-a456-426614174000' },
-            expected: '/v1/connections/complex-app-name/complex-object-name/uuid-123e4567-e89b-12d3-a456-426614174000',
-          },
-          {
-            source: { app: 'a', object: 'b', id: 'c' },
-            expected: '/v1/connections/a/b/c',
-          },
-        ];
-
-        for (const { source, expected } of testCases) {
-          const result = ConnectionResources.buildPath(source);
-          expect(result).toBe(expected);
-        }
-      });
-
-      test('should handle special characters in source parameters', () => {
-        const source = {
-          app: 'test-app',
-          object: 'test-object',
-          id: 'id-with-special@chars.123',
-        };
-
-        const result = ConnectionResources.buildPath(source);
-
-        expect(result).toBe('/v1/connections/test-app/test-object/id-with-special@chars.123');
-      });
-    });
 
     describe('listItemsBySource method', () => {
-      test('should call listConnectionsBySource function with correct parameters', async () => {
+      test('should call listConnections function with correct parameters', async () => {
         const mockResponse = MockHelpers.createPaginatedResponse([validConnection]);
         mockFetch.mockResolvedValueOnce(MockHelpers.createMockResponse(mockResponse));
 
-        const result = await connectionResources.listItemsBySource(validSource);
+        const result = await connectionResources.listItems(validSource);
 
         expect(result.items).toHaveLength(1);
         expect(result.items[0]).toEqual(expect.objectContaining({
@@ -138,7 +92,7 @@ describe('Connections Resources', () => {
         const mockResponse = MockHelpers.createPaginatedResponse([validConnection], pagination.nextToken);
         mockFetch.mockResolvedValueOnce(MockHelpers.createMockResponse(mockResponse));
 
-        const result = await connectionResources.listItemsBySource(validSource, pagination);
+        const result = await connectionResources.listItems(validSource, pagination);
 
         expect(result.items).toHaveLength(1);
         expect(result.items[0]).toEqual(expect.objectContaining({
@@ -165,7 +119,7 @@ describe('Connections Resources', () => {
         mockFetch.mockResolvedValueOnce(errorResponse);
 
         await expect(
-          connectionResources.listItemsBySource(validSource)
+          connectionResources.listItems(validSource)
         ).rejects.toThrow(HttpError);
       });
     });
@@ -251,13 +205,13 @@ describe('Connections Resources', () => {
     });
   });
 
-  describe('listConnectionsBySource function', () => {
+  describe('listConnections function', () => {
     test('should successfully list connections with valid response', async () => {
       const mockConnections = [validConnection, { ...validConnection, id: 'another-id' }];
       const mockResponse = MockHelpers.createPaginatedResponse(mockConnections);
       mockFetch.mockResolvedValueOnce(MockHelpers.createMockResponse(mockResponse));
 
-      const result = await listConnectionsBySource(mockInstance, validSource);
+      const result = await listConnections(mockInstance, validSource);
 
       expect(result.items).toHaveLength(2);
       expect(result.items[0]).toEqual(expect.objectContaining({
@@ -278,7 +232,7 @@ describe('Connections Resources', () => {
       const mockResponse = MockHelpers.createPaginatedResponse([]);
       mockFetch.mockResolvedValueOnce(MockHelpers.createMockResponse(mockResponse));
 
-      await listConnectionsBySource(mockInstance, validSource);
+      await listConnections(mockInstance, validSource);
 
       expect(mockFetch).toHaveBeenCalledWith(
         new URL('/v1/connections/test-app/test-object/test-id-123', mockInstance.config.host),
@@ -296,7 +250,7 @@ describe('Connections Resources', () => {
       };
       mockFetch.mockResolvedValueOnce(MockHelpers.createMockResponse(mockResponse));
 
-      const result = await listConnectionsBySource(mockInstance, validSource, pagination);
+      const result = await listConnections(mockInstance, validSource, pagination);
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0]).toEqual(expect.objectContaining({
@@ -318,7 +272,7 @@ describe('Connections Resources', () => {
       const mockResponse = MockHelpers.createPaginatedResponse([validConnection]);
       mockFetch.mockResolvedValueOnce(MockHelpers.createMockResponse(mockResponse));
 
-      await listConnectionsBySource(mockInstance, validSource);
+      await listConnections(mockInstance, validSource);
 
       const fetchCall = mockFetch.mock.calls[0];
       const calledUrl = fetchCall[0] as URL;
@@ -330,7 +284,7 @@ describe('Connections Resources', () => {
       const mockResponse = MockHelpers.createPaginatedResponse([]);
       mockFetch.mockResolvedValueOnce(MockHelpers.createMockResponse(mockResponse));
 
-      await listConnectionsBySource(mockInstance, validSource);
+      await listConnections(mockInstance, validSource);
 
       expect(mockAuthorization).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -349,7 +303,7 @@ describe('Connections Resources', () => {
       mockFetch.mockResolvedValueOnce(errorResponse);
 
       await expect(
-        listConnectionsBySource(mockInstance, validSource)
+        listConnections(mockInstance, validSource)
       ).rejects.toThrow(HttpError);
     });
 
@@ -357,7 +311,7 @@ describe('Connections Resources', () => {
       mockFetch.mockRejectedValueOnce(MockHelpers.createNetworkError());
 
       await expect(
-        listConnectionsBySource(mockInstance, validSource)
+        listConnections(mockInstance, validSource)
       ).rejects.toThrow(HttpError);
     });
 
@@ -368,7 +322,7 @@ describe('Connections Resources', () => {
       };
       mockFetch.mockResolvedValueOnce(MockHelpers.createMockResponse(emptyResponse));
 
-      const result = await listConnectionsBySource(mockInstance, validSource);
+      const result = await listConnections(mockInstance, validSource);
 
       expect(result.items).toHaveLength(0);
       expect(result.pagination?.nextToken).toBeFalsy();
@@ -603,7 +557,7 @@ describe('Connections Resources', () => {
       const emptyResponse = MockHelpers.createPaginatedResponse([]);
       mockFetch.mockResolvedValueOnce(MockHelpers.createMockResponse(emptyResponse));
 
-      let result = await connectionResources.listItemsBySource(validSource);
+      let result = await connectionResources.listItems(validSource);
       expect(result.items).toHaveLength(0);
 
       // Associate connection
@@ -620,7 +574,7 @@ describe('Connections Resources', () => {
       const responseWithItem = MockHelpers.createPaginatedResponse([validConnection]);
       mockFetch.mockResolvedValueOnce(MockHelpers.createMockResponse(responseWithItem));
 
-      result = await connectionResources.listItemsBySource(validSource);
+      result = await connectionResources.listItems(validSource);
       expect(result.items).toHaveLength(1);
 
       // Dissociate connection
@@ -644,7 +598,7 @@ describe('Connections Resources', () => {
       for (const source of differentSources) {
         mockFetch.mockResolvedValueOnce(MockHelpers.createMockResponse(MockHelpers.createPaginatedResponse([])));
 
-        await connectionResources.listItemsBySource(source);
+        await connectionResources.listItems(source);
 
         const expectedPath = `/v1/connections/${source.app}/${source.object}/${source.id}`;
         expect(mockFetch).toHaveBeenCalledWith(
@@ -658,7 +612,7 @@ describe('Connections Resources', () => {
 
     test('should handle authorization consistently across all operations', async () => {
       const operations = [
-        () => connectionResources.listItemsBySource(validSource),
+        () => connectionResources.listItems(validSource),
         () => connectionResources.associateItem(validSource, validUpsertPayload),
         () => connectionResources.dissociateItem(validSource, validUpsertPayload),
       ];
@@ -683,7 +637,7 @@ describe('Connections Resources', () => {
       mockFetch.mockResolvedValueOnce(MockHelpers.createMockResponseWithJsonError(200));
 
       await expect(
-        listConnectionsBySource(mockInstance, validSource)
+        listConnections(mockInstance, validSource)
       ).rejects.toThrow();
     });
 

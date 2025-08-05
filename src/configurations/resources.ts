@@ -24,10 +24,6 @@ export type ConfigurationListingFilter = {
 export class ConfigurationResources {
 	public constructor(private readonly instance: MondoAppConnect) {}
 
-	static buildListingPath(): string {
-		return PATH;
-	}
-
 	public listItems(
 		filter?: ConfigurationListingFilter,
 		pagination?: Pagination,
@@ -36,13 +32,13 @@ export class ConfigurationResources {
 	}
 }
 
-export async function listConfigurations(
+export function buildConfigurationListingURL(
 	instance: MondoAppConnect,
 	filter?: ConfigurationListingFilter,
 	pagination?: Pagination,
-): Promise<PaginationCollection<ConfigurationPayload>> {
+): URL {
 	const url = addPaginationToURL(
-		new URL(ConfigurationResources.buildListingPath(), instance.config.host),
+		new URL(PATH, instance.config.host),
 		pagination,
 	);
 
@@ -53,9 +49,26 @@ export async function listConfigurations(
 		);
 	}
 
+	return url;
+}
+
+export function parseConfigurationListingResponse(
+	data: unknown,
+): PaginationCollection<ConfigurationPayload> {
 	return parseEgressSchema(
-		PaginationCollectionSchema(ConfigurationPayloadSchema).safeParse(
-			await getItemWithAuthorization(url, instance.authorizer),
+		PaginationCollectionSchema(ConfigurationPayloadSchema).safeParse(data),
+	);
+}
+
+export async function listConfigurations(
+	instance: MondoAppConnect,
+	filter?: ConfigurationListingFilter,
+	pagination?: Pagination,
+): Promise<PaginationCollection<ConfigurationPayload>> {
+	return parseConfigurationListingResponse(
+		await getItemWithAuthorization(
+			buildConfigurationListingURL(instance, filter, pagination),
+			instance.authorizer,
 		),
 	);
 }

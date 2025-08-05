@@ -17,18 +17,10 @@ import {
 	AppObjectPayloadSchema,
 } from "./schema.js";
 
-const ITEM_PATH = "objects";
+const PATH = "objects";
 
 export class AppObjectResources {
 	public constructor(private readonly instance: MondoAppConnect) {}
-
-	static buildListingPath(app: AppHandle): string {
-		return [APP_PATH, app, ITEM_PATH].join("/");
-	}
-
-	static buildItemPath(app: AppHandle, object: AppObjectHandle): string {
-		return [AppObjectResources.buildListingPath(app), object].join("/");
-	}
 
 	public listItems(
 		app: AppHandle,
@@ -45,19 +37,46 @@ export class AppObjectResources {
 	}
 }
 
+export function buildAppObjectListingURL(
+	instance: MondoAppConnect,
+	app: AppHandle,
+	pagination?: Pagination,
+): URL {
+	return addPaginationToURL(
+		new URL(`${APP_PATH}/${app}/${PATH}`, instance.config.host),
+		pagination,
+	);
+}
+
+export function buildAppObjectItemURL(
+	instance: MondoAppConnect,
+	app: AppHandle,
+	object: AppObjectHandle,
+): URL {
+	return new URL(`${APP_PATH}/${app}/${PATH}/${object}`, instance.config.host);
+}
+
+export function parseAppObjectListingResponse(
+	data: unknown,
+): PaginationCollection<AppObjectPayload> {
+	return parseEgressSchema(
+		PaginationCollectionSchema(AppObjectPayloadSchema).safeParse(data),
+	);
+}
+
+export function parseAppObjectItemResponse(data: unknown): AppObjectPayload {
+	return parseEgressSchema(AppObjectPayloadSchema.safeParse(data));
+}
+
 export async function listAppObjects(
 	instance: MondoAppConnect,
 	app: AppHandle,
 	pagination?: Pagination,
 ): Promise<PaginationCollection<AppObjectPayload>> {
-	const url = addPaginationToURL(
-		new URL(AppObjectResources.buildListingPath(app), instance.config.host),
-		pagination,
-	);
-
-	return parseEgressSchema(
-		PaginationCollectionSchema(AppObjectPayloadSchema).safeParse(
-			await getItemWithAuthorization(url, instance.authorizer),
+	return parseAppObjectListingResponse(
+		await getItemWithAuthorization(
+			buildAppObjectListingURL(instance, app, pagination),
+			instance.authorizer,
 		),
 	);
 }
@@ -67,14 +86,10 @@ export async function getAppObject(
 	app: AppHandle,
 	object: AppObjectHandle,
 ): Promise<AppObjectPayload> {
-	const url = new URL(
-		AppObjectResources.buildItemPath(app, object),
-		instance.config.host,
-	);
-
-	return parseEgressSchema(
-		AppObjectPayloadSchema.safeParse(
-			await getItemWithAuthorization(url, instance.authorizer),
+	return parseAppObjectItemResponse(
+		await getItemWithAuthorization(
+			buildAppObjectItemURL(instance, app, object),
+			instance.authorizer,
 		),
 	);
 }

@@ -16,14 +16,6 @@ export const PATH = "/v1/apps";
 export class AppResources {
 	public constructor(private readonly instance: MondoAppConnect) {}
 
-	static buildListingPath(): string {
-		return PATH;
-	}
-
-	static buildItemPath(app: AppHandle): string {
-		return [PATH, app].join("/");
-	}
-
 	public listItems(
 		pagination?: Pagination,
 	): Promise<PaginationCollection<AppPayload>> {
@@ -35,18 +27,40 @@ export class AppResources {
 	}
 }
 
+export function buildAppListingURL(
+	instance: MondoAppConnect,
+	pagination?: Pagination,
+): URL {
+	return addPaginationToURL(new URL(PATH, instance.config.host), pagination);
+}
+
+export function buildAppItemURL(
+	instance: MondoAppConnect,
+	app: AppHandle,
+): URL {
+	return new URL(`${PATH}/${app}`, instance.config.host);
+}
+
+export function parseAppListingResponse(
+	data: unknown,
+): PaginationCollection<AppPayload> {
+	return parseEgressSchema(
+		PaginationCollectionSchema(AppPayloadSchema).safeParse(data),
+	);
+}
+
+export function parseAppItemResponse(data: unknown): AppPayload {
+	return parseEgressSchema(AppPayloadSchema.safeParse(data));
+}
+
 export async function listApps(
 	instance: MondoAppConnect,
 	pagination?: Pagination,
 ): Promise<PaginationCollection<AppPayload>> {
-	const url = addPaginationToURL(
-		new URL(AppResources.buildListingPath(), instance.config.host),
-		pagination,
-	);
-
-	return parseEgressSchema(
-		PaginationCollectionSchema(AppPayloadSchema).safeParse(
-			await getItemWithAuthorization(url, instance.authorizer),
+	return parseAppListingResponse(
+		await getItemWithAuthorization(
+			buildAppListingURL(instance, pagination),
+			instance.authorizer,
 		),
 	);
 }
@@ -55,11 +69,10 @@ export async function getApp(
 	instance: MondoAppConnect,
 	app: AppHandle,
 ): Promise<AppPayload> {
-	const url = new URL(AppResources.buildItemPath(app), instance.config.host);
-
-	return parseEgressSchema(
-		AppPayloadSchema.safeParse(
-			await getItemWithAuthorization(url, instance.authorizer),
+	return parseAppItemResponse(
+		await getItemWithAuthorization(
+			buildAppItemURL(instance, app),
+			instance.authorizer,
 		),
 	);
 }

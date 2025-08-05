@@ -1,2 +1,7 @@
-export { ConfigurationResources, listConfigurations } from "./resources.js";
+export {
+	buildConfigurationListingURL,
+	ConfigurationResources,
+	listConfigurations,
+	parseConfigurationListingResponse,
+} from "./resources.js";
 export * from "./schema.js";

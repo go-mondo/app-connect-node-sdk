@@ -4,7 +4,7 @@ import {
   ConnectionResources,
   associateConnection,
   dissociateConnection,
-  listConnectionsBySource,
+  listConnections,
 } from './resources.js';
 import {
   ConnectionPayloadSchema,
@@ -47,20 +47,20 @@ describe('Connections Index Module', () => {
       expect(ConnectionsModule.ConnectionResources).toBeDefined();
       expect(ConnectionsModule.associateConnection).toBeDefined();
       expect(ConnectionsModule.dissociateConnection).toBeDefined();
-      expect(ConnectionsModule.listConnectionsBySource).toBeDefined();
+      expect(ConnectionsModule.listConnections).toBeDefined();
 
       // Verify they are the same as imported directly
       expect(ConnectionsModule.ConnectionResources).toBe(ConnectionResources);
       expect(ConnectionsModule.associateConnection).toBe(associateConnection);
       expect(ConnectionsModule.dissociateConnection).toBe(dissociateConnection);
-      expect(ConnectionsModule.listConnectionsBySource).toBe(listConnectionsBySource);
+      expect(ConnectionsModule.listConnections).toBe(listConnections);
     });
 
     test('should export resource functions as callable functions', () => {
       expect(typeof ConnectionsModule.ConnectionResources).toBe('function');
       expect(typeof ConnectionsModule.associateConnection).toBe('function');
       expect(typeof ConnectionsModule.dissociateConnection).toBe('function');
-      expect(typeof ConnectionsModule.listConnectionsBySource).toBe('function');
+      expect(typeof ConnectionsModule.listConnections).toBe('function');
     });
   });
 
@@ -158,7 +158,7 @@ describe('Connections Index Module', () => {
         'PATH',
         'associateConnection',
         'dissociateConnection',
-        'listConnectionsBySource',
+        'listConnections',
       ];
 
       for (const exportName of expectedExports) {
@@ -184,7 +184,7 @@ describe('Connections Index Module', () => {
         'PATH',
         'associateConnection',
         'dissociateConnection',
-        'listConnectionsBySource',
+        'listConnections',
       ];
 
       // Check that we don't have unexpected exports
@@ -321,41 +321,25 @@ describe('Connections Index Module', () => {
       expect(ConnectionsModule.ConnectionResources === ConnectionResources).toBe(true);
       expect(ConnectionsModule.associateConnection === associateConnection).toBe(true);
       expect(ConnectionsModule.dissociateConnection === dissociateConnection).toBe(true);
-      expect(ConnectionsModule.listConnectionsBySource === listConnectionsBySource).toBe(true);
+      expect(ConnectionsModule.listConnections === listConnections).toBe(true);
     });
 
     test('should preserve class and function properties', () => {
       // Verify that ConnectionResources class is properly exported
       expect(ConnectionsModule.ConnectionResources.prototype.constructor).toBe(ConnectionResources);
-      expect(ConnectionsModule.ConnectionResources.buildPath).toBe(ConnectionResources.buildPath);
     });
   });
 
   describe('Resource class functionality', () => {
-    test('should export ConnectionResources class with static methods', () => {
-      // Verify static method exists and is callable
-      expect(typeof ConnectionsModule.ConnectionResources.buildPath).toBe('function');
-
-      // Test static method functionality
-      const source = {
-        app: 'test-app',
-        object: 'test-object',
-        id: 'test-id',
-      };
-
-      const path = ConnectionsModule.ConnectionResources.buildPath(source);
-      expect(path).toBe('/v1/connections/test-app/test-object/test-id');
-    });
-
     test('should export standalone resource functions', () => {
       // Verify all resource functions are exported and callable
-      expect(typeof ConnectionsModule.listConnectionsBySource).toBe('function');
+      expect(typeof ConnectionsModule.listConnections).toBe('function');
       expect(typeof ConnectionsModule.associateConnection).toBe('function');
       expect(typeof ConnectionsModule.dissociateConnection).toBe('function');
 
       // These are async functions, so they should return promises when called
       // We won't actually call them here since they require proper setup and mocking
-      expect(ConnectionsModule.listConnectionsBySource.constructor.name).toBe('AsyncFunction');
+      expect(ConnectionsModule.listConnections.constructor.name).toBe('AsyncFunction');
       expect(ConnectionsModule.associateConnection.constructor.name).toBe('AsyncFunction');
       expect(ConnectionsModule.dissociateConnection.constructor.name).toBe('AsyncFunction');
     });

@@ -1,7 +1,12 @@
 export {
 	associateConnection,
+	buildConnectionItemURL,
+	buildConnectionListingURL,
 	ConnectionResources,
 	dissociateConnection,
-	listConnectionsBySource,
+	listConnections,
+	parseConnectionItemResponse,
+	parseConnectionListingResponse,
+	parseConnectionUpsertPayload,
 } from "./resources.js";
 export * from "./schema.js";
