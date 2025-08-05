@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.1-beta.7](https://github.com/go-mondo/app-connect-node-sdk/compare/app-connect-sdk-v0.0.1-beta.6...app-connect-sdk-v0.0.1-beta.7) (2025-08-05)
+
+
+### Bug Fixes
+
+* resource refactoring ([3b69ece](https://github.com/go-mondo/app-connect-node-sdk/commit/3b69ece716b211dca46e0a597aae425e9c697b83))
+
 ## [0.0.1-beta.6](https://github.com/go-mondo/app-connect-node-sdk/compare/app-connect-sdk-v0.0.1-beta.5...app-connect-sdk-v0.0.1-beta.6) (2025-08-05)
 
 
