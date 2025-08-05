@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.1-beta.8](https://github.com/go-mondo/app-connect-node-sdk/compare/app-connect-sdk-v0.0.1-beta.7...app-connect-sdk-v0.0.1-beta.8) (2025-08-05)
+
+
+### Bug Fixes
+
+* adding connection filters ([2238c6c](https://github.com/go-mondo/app-connect-node-sdk/commit/2238c6c0e8dbc7180917de4cfb7e6b31cfafee16))
+
 ## [0.0.1-beta.7](https://github.com/go-mondo/app-connect-node-sdk/compare/app-connect-sdk-v0.0.1-beta.6...app-connect-sdk-v0.0.1-beta.7) (2025-08-05)
 
 
