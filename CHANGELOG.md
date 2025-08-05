@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.1-beta.9](https://github.com/go-mondo/app-connect-node-sdk/compare/app-connect-sdk-v0.0.1-beta.8...app-connect-sdk-v0.0.1-beta.9) (2025-08-05)
+
+
+### Bug Fixes
+
+* removing test scaffold from main export ([a91a18f](https://github.com/go-mondo/app-connect-node-sdk/commit/a91a18f9c43272cc8dad9ddd70e282cb18d124c0))
+
 ## [0.0.1-beta.8](https://github.com/go-mondo/app-connect-node-sdk/compare/app-connect-sdk-v0.0.1-beta.7...app-connect-sdk-v0.0.1-beta.8) (2025-08-05)
 
 
