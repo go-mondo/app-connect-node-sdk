@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { MockHelpers, TestDataFactory, TestUrls } from './index.js';
+import { MockHelpers, TestDataFactory, TestUrls } from './test-utils.js';
 
 describe('Test Utilities Integration', () => {
   test('should be able to import and use test utilities from common module', () => {

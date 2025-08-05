@@ -6,9 +6,8 @@ export {
 	parseEgressSchema,
 	parseIngressSchema,
 	responseToHttpError,
-	toHttpError,
+	toHttpError
 } from "./resources/utils.js";
 export * from "./schema/schema.js";
-export * from "./test-utils.js";
 
 export default MondoAppConnect;

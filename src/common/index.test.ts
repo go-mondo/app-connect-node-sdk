@@ -3,33 +3,37 @@ import { MondoAppConnect } from './init.js';
 
 // Import the module to test its exports
 import commonModule, {
-    // Collection exports
-    CollectionSchema,
-    defaultMutationRequestHeaders,
-    defaultRequestHeaders,
-    // Schema exports
-    HandleSchema,
-    InvalidDataFactory,
-    MockHelpers,
-    normalizeUrlWithTokens,
-    OptionalDateSchema,
-    optionallyNullish,
-    optionallyNullishToUndefined,
-    optionallyUndefined,
-    // Pagination exports
-    PaginationSchema,
-    parseEgressSchema,
-    parseIngressSchema,
-    // Date exports
-    RequiredDateSchema,
-    responseToHttpError,
-    // Test utils exports
-    TestDataFactory,
-    TestDates,
-    TestSetup,
-    TestUrls,
-    toHttpError,
+  // Collection exports
+  CollectionSchema,
+  defaultMutationRequestHeaders,
+  defaultRequestHeaders,
+  // Schema exports
+  HandleSchema,
+  normalizeUrlWithTokens,
+  OptionalDateSchema,
+  optionallyNullish,
+  optionallyNullishToUndefined,
+  optionallyUndefined,
+  // Pagination exports
+  PaginationSchema,
+  parseEgressSchema,
+  parseIngressSchema,
+  // Date exports
+  RequiredDateSchema,
+  responseToHttpError,
+  // Test utils exports
+  toHttpError,
 } from './index.js';
+
+import {
+  InvalidDataFactory,
+  MockHelpers,
+  // Test utils exports
+  TestDataFactory,
+  TestDates,
+  TestSetup,
+  TestUrls,
+} from './test-utils.js';
 
 // Mock console.debug to avoid noise in tests
 global.console.debug = vi.fn();
@@ -65,18 +69,18 @@ describe('Common - Index Module (index.ts)', () => {
   describe('resource utils exports', () => {
     test('should export defaultRequestHeaders function', () => {
       expect(typeof defaultRequestHeaders).toBe('function');
-      
+
       const headers = defaultRequestHeaders();
-      
+
       expect(headers).toBeInstanceOf(Headers);
       expect(headers.get('accept')).toBe('application/json');
     });
 
     test('should export defaultMutationRequestHeaders function', () => {
       expect(typeof defaultMutationRequestHeaders).toBe('function');
-      
+
       const headers = defaultMutationRequestHeaders();
-      
+
       expect(headers).toBeInstanceOf(Headers);
       expect(headers.get('accept')).toBe('application/json');
       expect(headers.get('content-type')).toBe('application/json');
@@ -84,21 +88,21 @@ describe('Common - Index Module (index.ts)', () => {
 
     test('should export parseEgressSchema function', () => {
       expect(typeof parseEgressSchema).toBe('function');
-      
+
       const testData = { test: 'data' };
       const safeParse = { success: true as const, data: testData };
       const result = parseEgressSchema(safeParse);
-      
+
       expect(result).toEqual(testData);
     });
 
     test('should export parseIngressSchema function', () => {
       expect(typeof parseIngressSchema).toBe('function');
-      
+
       const testData = { test: 'data' };
       const safeParse = { success: true as const, data: testData };
       const result = parseIngressSchema(safeParse);
-      
+
       expect(result).toEqual(testData);
     });
 
@@ -119,10 +123,10 @@ describe('Common - Index Module (index.ts)', () => {
 
     test('should export normalizeUrlWithTokens function', () => {
       expect(typeof normalizeUrlWithTokens).toBe('function');
-      
+
       const testUrl = 'https://example.com/path/%7B%7Bid%7D%7D';
       const result = normalizeUrlWithTokens(testUrl);
-      
+
       expect(result).toBe('https://example.com/path/{{id}}');
     });
 
@@ -271,12 +275,12 @@ describe('Common - Index Module (index.ts)', () => {
       // Import the entire module to check for unexpected exports
       const moduleExports = await import('./index.js');
       const moduleKeys = Object.keys(moduleExports);
-      
+
       const expectedExports = [
         'default',
         // Resource utils
         'defaultMutationRequestHeaders',
-        'defaultRequestHeaders', 
+        'defaultRequestHeaders',
         'parseEgressSchema',
         'parseIngressSchema',
         'responseToHttpError',
@@ -285,7 +289,7 @@ describe('Common - Index Module (index.ts)', () => {
         'HandleSchema',
         'normalizeUrlWithTokens',
         'optionallyNullishToUndefined',
-        'optionallyNullish', 
+        'optionallyNullish',
         'optionallyUndefined',
         'CollectionSchema',
         'RequiredDateSchema',
@@ -318,7 +322,7 @@ describe('Common - Index Module (index.ts)', () => {
       // Verify that re-exported functions maintain their original behavior
       const originalHeaders = defaultRequestHeaders();
       const reExportedHeaders = defaultRequestHeaders();
-      
+
       expect(originalHeaders.get('accept')).toBe(reExportedHeaders.get('accept'));
     });
   });
@@ -327,17 +331,17 @@ describe('Common - Index Module (index.ts)', () => {
     test('should work with MondoAppConnect instance', () => {
       const config = TestDataFactory.validSdkConfig();
       const instance = new commonModule(config);
-      
+
       expect(instance).toBeInstanceOf(MondoAppConnect);
       expect(instance.config.accessToken).toBe(config.accessToken);
-      
+
       // Test that the authorizer works with exported utilities
       const authorizer = instance.authorizer;
       const request = {
         method: 'GET',
         headers: defaultRequestHeaders(),
       };
-      
+
       const authorizedRequest = authorizer(request);
       expect(authorizedRequest.headers).toBeInstanceOf(Headers);
     });
@@ -346,7 +350,7 @@ describe('Common - Index Module (index.ts)', () => {
       const mockAuth = MockHelpers.createMockAuthorization();
       const testData = TestDataFactory.validApp();
       const mockResponse = MockHelpers.createMockResponse(testData);
-      
+
       expect(typeof mockAuth).toBe('function');
       expect(typeof testData).toBe('object');
       expect(mockResponse.ok).toBe(true);
