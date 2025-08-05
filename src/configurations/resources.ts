@@ -2,6 +2,7 @@ import type { AppHandle } from "../apps/schema.js";
 import type { MondoAppConnect } from "../common/init.js";
 import { getItemWithAuthorization } from "../common/resources/operations.js";
 import {
+	addFiltersToURL,
 	addPaginationToURL,
 	parseEgressSchema,
 } from "../common/resources/utils.js";
@@ -37,19 +38,10 @@ export function buildConfigurationListingURL(
 	filter?: ConfigurationListingFilter,
 	pagination?: Pagination,
 ): URL {
-	const url = addPaginationToURL(
-		new URL(PATH, instance.config.host),
-		pagination,
+	return addFiltersToURL(
+		addPaginationToURL(new URL(PATH, instance.config.host), pagination),
+		filter,
 	);
-
-	// Add filter(s)
-	if (filter) {
-		Object.entries(filter).forEach(([key, value]) =>
-			url.searchParams.append(`filter[${key}]`, value),
-		);
-	}
-
-	return url;
 }
 
 export function parseConfigurationListingResponse(

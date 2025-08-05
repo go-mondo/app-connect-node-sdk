@@ -92,7 +92,7 @@ describe('Connections Resources', () => {
         const mockResponse = MockHelpers.createPaginatedResponse([validConnection], pagination.nextToken);
         mockFetch.mockResolvedValueOnce(MockHelpers.createMockResponse(mockResponse));
 
-        const result = await connectionResources.listItems(validSource, pagination);
+        const result = await connectionResources.listItems(validSource, undefined, pagination);
 
         expect(result.items).toHaveLength(1);
         expect(result.items[0]).toEqual(expect.objectContaining({
@@ -250,7 +250,7 @@ describe('Connections Resources', () => {
       };
       mockFetch.mockResolvedValueOnce(MockHelpers.createMockResponse(mockResponse));
 
-      const result = await listConnections(mockInstance, validSource, pagination);
+      const result = await listConnections(mockInstance, validSource, undefined, pagination);
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0]).toEqual(expect.objectContaining({

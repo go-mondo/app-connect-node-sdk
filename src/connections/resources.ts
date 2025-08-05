@@ -5,6 +5,7 @@ import {
 	putItemWithAuthorization,
 } from "../common/resources/operations.js";
 import {
+	addFiltersToURL,
 	addPaginationToURL,
 	parseEgressSchema,
 	parseIngressSchema,
@@ -18,6 +19,7 @@ import {
 	type ConnectionPayload,
 	ConnectionPayloadSchema,
 	type Source,
+	type Target,
 	type UpsertConnectionInput,
 	type UpsertConnectionPayload,
 	UpsertConnectionPayloadSchema,
@@ -30,9 +32,10 @@ export class ConnectionResources {
 
 	public listItems(
 		source: Source,
+		filter?: Partial<Target>,
 		pagination?: Pagination,
 	): Promise<PaginationCollection<ConnectionPayload>> {
-		return listConnections(this.instance, source, pagination);
+		return listConnections(this.instance, source, filter, pagination);
 	}
 
 	public associateItem(
@@ -53,14 +56,18 @@ export class ConnectionResources {
 export function buildConnectionListingURL(
 	instance: MondoAppConnect,
 	source: Source,
+	filter?: Partial<Target>,
 	pagination?: Pagination,
 ): URL {
-	return addPaginationToURL(
-		new URL(
-			`${PATH}/${source.app}/${source.object}/${source.id}`,
-			instance.config.host,
+	return addFiltersToURL(
+		addPaginationToURL(
+			new URL(
+				`${PATH}/${source.app}/${source.object}/${source.id}`,
+				instance.config.host,
+			),
+			pagination,
 		),
-		pagination,
+		filter,
 	);
 }
 
@@ -95,11 +102,12 @@ export function parseConnectionUpsertPayload(
 export async function listConnections(
 	instance: MondoAppConnect,
 	source: Source,
+	filter?: Partial<Target>,
 	pagination?: Pagination,
 ): Promise<PaginationCollection<ConnectionPayload>> {
 	return parseConnectionListingResponse(
 		await getItemWithAuthorization(
-			buildConnectionListingURL(instance, source, pagination),
+			buildConnectionListingURL(instance, source, filter, pagination),
 			instance.authorizer,
 		),
 	);

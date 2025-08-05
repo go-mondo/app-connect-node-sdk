@@ -69,6 +69,19 @@ export function addPaginationToURL(
 	return url;
 }
 
+export function addFiltersToURL(
+	url: URL,
+	filters?: Record<string, string>,
+): URL {
+	if (filters) {
+		Object.entries(filters).forEach(([key, value]) =>
+			url.searchParams.append(`filter[${key}]`, value),
+		);
+	}
+
+	return url;
+}
+
 export async function responseToHttpError(
 	response: Response,
 ): Promise<HttpError> {
