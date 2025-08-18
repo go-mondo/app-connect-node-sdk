@@ -46,7 +46,7 @@ describe('Common - Initialization (init.ts)', () => {
       const instance = new MondoAppConnect(config);
 
       expect(instance.config.host.toString()).toBe(
-        'https://dxnh0yagb1.execute-api.us-east-1.amazonaws.com/'
+        'https://api.mondoappconnect.com/'
       );
     });
 
@@ -230,10 +230,10 @@ describe('Common - Initialization (init.ts)', () => {
     test('should return identity function when no access token provided', () => {
       // Create a mock config that bypasses validation for testing the else branch
       const instance = new MondoAppConnect({ accessToken: 'temp' });
-      
+
       // Manually set config to test the else branch
       (instance as any).config = { accessToken: '' };
-      
+
       const authorizer = instance.authorizer;
       const request: RequestInit = {
         method: 'GET',
@@ -241,7 +241,7 @@ describe('Common - Initialization (init.ts)', () => {
       };
 
       const result = authorizer(request);
-      
+
       // Should return the same request object unchanged
       expect(result).toBe(request);
       expect(result.method).toBe('GET');

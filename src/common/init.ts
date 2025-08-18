@@ -4,7 +4,7 @@ const HostSchema = z
 	.url({
 		hostname: z.regexes.domain,
 	})
-	.default("https://dxnh0yagb1.execute-api.us-east-1.amazonaws.com") // Todo - Replace me!
+	.default("https://api.mondoappconnect.com")
 	.transform((url) => new URL(url));
 export type HostProps = z.input<typeof HostSchema>;
 export type Host = z.output<typeof HostSchema>;
