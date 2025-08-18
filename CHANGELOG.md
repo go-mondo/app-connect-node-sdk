@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.1-beta.11](https://github.com/go-mondo/app-connect-node-sdk/compare/app-connect-sdk-v0.0.1-beta.10...app-connect-sdk-v0.0.1-beta.11) (2025-08-18)
+
+
+### Features
+
+* updating api host ([ae6fb09](https://github.com/go-mondo/app-connect-node-sdk/commit/ae6fb09f61d73f91f91bc927ad0abc7bf7b39e21))
+
 ## [0.0.1-beta.10](https://github.com/go-mondo/app-connect-node-sdk/compare/app-connect-sdk-v0.0.1-beta.9...app-connect-sdk-v0.0.1-beta.10) (2025-08-05)
 
 
