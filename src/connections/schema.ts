@@ -15,6 +15,12 @@ export const EntitySchema = z.object({
 	object: AppObjectSchema.pick({ handle: true }),
 });
 
+const ReferenceEntitySchema = z.object({
+	id: z.string(),
+	app: AppSchema.pick({ name: true, handle: true }),
+	object: AppObjectSchema.pick({ name: true, handle: true }),
+});
+
 export const ExpandedEntitySchema = z.object({
 	id: z.string(),
 	app: AppSchema.pick({ name: true, handle: true, avatar: true }),
@@ -27,11 +33,11 @@ export type Source = z.output<typeof SourceSchema>;
 export const TargetSchema = BaseEntitySchema;
 export type Target = z.output<typeof TargetSchema>;
 
-export const ExpandedSourceSchema = ExpandedEntitySchema;
-export type ExpandedSource = z.output<typeof ExpandedSourceSchema>;
+export const ReferenceSourceSchema = ReferenceEntitySchema;
+export type ReferenceSource = z.output<typeof ReferenceSourceSchema>;
 
-export const ExpandedTargetSchema = ExpandedEntitySchema;
-export type ExpandedTarget = z.output<typeof ExpandedTargetSchema>;
+export const ReferenceTargetSchema = ReferenceEntitySchema;
+export type ReferenceTarget = z.output<typeof ReferenceTargetSchema>;
 
 export const ConnectionPayloadSchema = ExpandedEntitySchema.extend({
 	updatedAt: RequiredDateSchema,
