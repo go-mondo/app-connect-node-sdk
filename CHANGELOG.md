@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.1-beta.12](https://github.com/go-mondo/app-connect-node-sdk/compare/app-connect-sdk-v0.0.1-beta.11...app-connect-sdk-v0.0.1-beta.12) (2025-08-21)
+
+
+### Bug Fixes
+
+* exporting the expanded connection entity ([b264f2c](https://github.com/go-mondo/app-connect-node-sdk/commit/b264f2ce068e8bef0bdd84b4f2908e1f1f5442a1))
+
 ## [0.0.1-beta.11](https://github.com/go-mondo/app-connect-node-sdk/compare/app-connect-sdk-v0.0.1-beta.10...app-connect-sdk-v0.0.1-beta.11) (2025-08-18)
 
 
