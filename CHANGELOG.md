@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.1-beta.13](https://github.com/go-mondo/app-connect-node-sdk/compare/app-connect-sdk-v0.0.1-beta.12...app-connect-sdk-v0.0.1-beta.13) (2025-08-21)
+
+
+### Bug Fixes
+
+* export reference schema ([f54229b](https://github.com/go-mondo/app-connect-node-sdk/commit/f54229bab95b0e0fa96ae001530ec66fdac3b509))
+
 ## [0.0.1-beta.12](https://github.com/go-mondo/app-connect-node-sdk/compare/app-connect-sdk-v0.0.1-beta.11...app-connect-sdk-v0.0.1-beta.12) (2025-08-21)
 
 
