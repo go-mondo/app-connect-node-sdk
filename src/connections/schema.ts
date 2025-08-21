@@ -27,6 +27,12 @@ export type Source = z.output<typeof SourceSchema>;
 export const TargetSchema = BaseEntitySchema;
 export type Target = z.output<typeof TargetSchema>;
 
+export const ExpandedSourceSchema = ExpandedEntitySchema;
+export type ExpandedSource = z.output<typeof ExpandedSourceSchema>;
+
+export const ExpandedTargetSchema = ExpandedEntitySchema;
+export type ExpandedTarget = z.output<typeof ExpandedTargetSchema>;
+
 export const ConnectionPayloadSchema = ExpandedEntitySchema.extend({
 	updatedAt: RequiredDateSchema,
 	inferred: z.boolean().optional(),
