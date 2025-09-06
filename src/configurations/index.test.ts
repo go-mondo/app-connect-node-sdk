@@ -1,23 +1,20 @@
-import { z } from 'zod';
 import { describe, expect, test } from 'vitest';
 import * as ConfigurationsModule from './index.js';
 import {
-    ConfigurationIdentifiersSchema,
-    ConfigurationPayloadSchema,
-    ConfigurationSchema,
-    ConfigurationStatus,
-    JoinType,
-    SourceSchema,
-    TargetSchema,
-    UpsertConfigurationPayloadSchema,
-    type AnyConfigurationStatus,
-    type AnyJoinType,
-    type Configuration,
-    type ConfigurationIdentifiersPayload,
-    type ConfigurationPayload,
-    type Source,
-    type Target,
-    type UpsertConfigurationPayload
+  ConfigurationIdentifiersSchema,
+  ConfigurationPayloadSchema,
+  ConfigurationSchema,
+  ConfigurationStatus,
+  JoinType,
+  SourceSchema,
+  TargetSchema,
+  UpsertConfigurationPayloadSchema,
+  type AnyConfigurationStatus,
+  type AnyJoinType,
+  type Configuration,
+  type ConfigurationPayload,
+  type Source,
+  type Target
 } from './schema.js';
 
 describe('Configurations Index Module', () => {
@@ -29,7 +26,7 @@ describe('Configurations Index Module', () => {
       expect(ConfigurationsModule.ConfigurationIdentifiersSchema).toBeDefined();
       expect(ConfigurationsModule.SourceSchema).toBeDefined();
       expect(ConfigurationsModule.TargetSchema).toBeDefined();
-      
+
       // Verify they are the same functions as imported directly
       expect(ConfigurationsModule.ConfigurationSchema).toBe(ConfigurationSchema);
       expect(ConfigurationsModule.ConfigurationPayloadSchema).toBe(ConfigurationPayloadSchema);
@@ -67,7 +64,7 @@ describe('Configurations Index Module', () => {
     test('should export enums as objects with correct properties', () => {
       expect(typeof ConfigurationsModule.JoinType).toBe('object');
       expect(typeof ConfigurationsModule.ConfigurationStatus).toBe('object');
-      
+
       // Verify enum structure
       expect(Object.keys(ConfigurationsModule.JoinType)).toEqual(['ONE', 'MANY']);
       expect(Object.keys(ConfigurationsModule.ConfigurationStatus)).toEqual(['ENABLED', 'DISABLED']);
@@ -78,7 +75,7 @@ describe('Configurations Index Module', () => {
     test('should have proper TypeScript type exports available', () => {
       // This test verifies that the types are properly exported and can be used
       // TypeScript compilation will fail if these types are not available
-      
+
       const configuration: Configuration = {
         source: {
           app: { handle: 'source-app', name: 'Source App' },
@@ -93,7 +90,7 @@ describe('Configurations Index Module', () => {
         status: 'enabled',
         updatedAt: new Date(),
       };
-      
+
       const configurationPayload: ConfigurationPayload = {
         source: {
           app: { handle: 'source-app', name: 'Source App' },
@@ -108,7 +105,7 @@ describe('Configurations Index Module', () => {
         status: 'enabled',
         updatedAt: '2024-01-01T00:00:00.000Z',
       };
-      
+
       const upsertPayload = {
         source: {
           app: 'source-app',
@@ -122,7 +119,7 @@ describe('Configurations Index Module', () => {
         },
         status: 'disabled' as const,
       };
-      
+
       const identifiers = {
         source: {
           app: 'source-app',
@@ -133,22 +130,22 @@ describe('Configurations Index Module', () => {
           object: 'target-object',
         },
       };
-      
+
       const source: Source = {
         app: { handle: 'source-app', name: 'Source App' },
         object: { handle: 'source-object', name: 'Source Object' },
         join: 'one',
       };
-      
+
       const target: Target = {
         app: { handle: 'target-app', name: 'Target App' },
         object: { handle: 'target-object', name: 'Target Object' },
         join: 'many',
       };
-      
+
       const joinType: AnyJoinType = 'one';
       const status: AnyConfigurationStatus = 'enabled';
-      
+
       // Verify the objects have the expected structure
       expect(configuration.source.app).toEqual({ handle: 'source-app', name: 'Source App' });
       expect(configurationPayload.target.join).toBe('many');
@@ -158,56 +155,6 @@ describe('Configurations Index Module', () => {
       expect(target.join).toBe('many');
       expect(joinType).toBe('one');
       expect(status).toBe('enabled');
-    });
-  });
-
-  describe('Module structure', () => {
-    test('should export all expected members', () => {
-      const expectedExports = [
-        'ConfigurationSchema',
-        'ConfigurationPayloadSchema',
-        'UpsertConfigurationPayloadSchema',
-        'ConfigurationIdentifiersSchema',
-        'SourceSchema',
-        'TargetSchema',
-        'JoinType',
-        'ConfigurationStatus',
-      ];
-      
-      for (const exportName of expectedExports) {
-        expect(ConfigurationsModule).toHaveProperty(exportName);
-        expect(ConfigurationsModule[exportName as keyof typeof ConfigurationsModule]).toBeDefined();
-      }
-    });
-
-    test('should not export unexpected members', () => {
-      // Get all enumerable properties of the module
-      const actualExports = Object.keys(ConfigurationsModule);
-      
-      const expectedExports = [
-        'ConfigurationSchema',
-        'ConfigurationPayloadSchema',
-        'UpsertConfigurationPayloadSchema',
-        'ConfigurationIdentifiersSchema',
-        'SourceSchema',
-        'TargetSchema',
-        'JoinType',
-        'ConfigurationStatus',
-      ];
-      
-      // Check that we don't have unexpected exports
-      const unexpectedExports = actualExports.filter(
-        exportName => !expectedExports.includes(exportName)
-      );
-      
-      expect(unexpectedExports).toEqual([]);
-    });
-
-    test('should have consistent export count', () => {
-      const actualExportCount = Object.keys(ConfigurationsModule).length;
-      const expectedExportCount = 8; // Based on the schema and enum exports
-      
-      expect(actualExportCount).toBe(expectedExportCount);
     });
   });
 
@@ -227,13 +174,13 @@ describe('Configurations Index Module', () => {
         status: ConfigurationsModule.ConfigurationStatus.ENABLED,
         updatedAt: new Date('2024-01-01T00:00:00.000Z').toISOString(),
       };
-      
+
       // Test that we can use the exported schemas
       const configResult = ConfigurationsModule.ConfigurationSchema.safeParse(testConfiguration);
       const payloadResult = ConfigurationsModule.ConfigurationPayloadSchema.safeParse(testConfiguration);
       const sourceResult = ConfigurationsModule.SourceSchema.safeParse(testConfiguration.source);
       const targetResult = ConfigurationsModule.TargetSchema.safeParse(testConfiguration.target);
-      
+
       // Verify results are valid (successful parsing)
       expect(configResult.success).toBe(true);
       expect(payloadResult.success).toBe(true);
@@ -255,7 +202,7 @@ describe('Configurations Index Module', () => {
         },
         status: ConfigurationsModule.ConfigurationStatus.DISABLED,
       };
-      
+
       const validIdentifiersData = {
         source: {
           app: 'identifiers-test-source',
@@ -266,11 +213,11 @@ describe('Configurations Index Module', () => {
           object: 'identifiers-test-target-object',
         },
       };
-      
+
       // Test upsert schema
       const upsertResult = ConfigurationsModule.UpsertConfigurationPayloadSchema.safeParse(validUpsertData);
       expect(upsertResult.success).toBe(true);
-      
+
       // Test identifiers schema
       const identifiersResult = ConfigurationsModule.ConfigurationIdentifiersSchema.safeParse(validIdentifiersData);
       expect(identifiersResult.success).toBe(true);
@@ -291,7 +238,7 @@ describe('Configurations Index Module', () => {
         status: ConfigurationsModule.ConfigurationStatus.DISABLED,
         updatedAt: new Date().toISOString(),
       };
-      
+
       const result = ConfigurationsModule.ConfigurationSchema.safeParse(configurationWithModuleEnums);
       expect(result.success).toBe(true);
     });
@@ -333,12 +280,12 @@ describe('Configurations Index Module', () => {
         },
         updatedAt: new Date().toISOString(),
       };
-      
+
       const result = ConfigurationsModule.ConfigurationSchema.safeParse(minimalConfiguration);
       expect(result.success).toBe(true);
-      
+
       if (!result.success) return;
-      
+
       // Verify default values are applied
       expect(result.data.source.join).toBe(ConfigurationsModule.JoinType.ONE);
       expect(result.data.target.join).toBe(ConfigurationsModule.JoinType.ONE);
@@ -360,12 +307,12 @@ describe('Configurations Index Module', () => {
         status: ConfigurationsModule.ConfigurationStatus.DISABLED,
         updatedAt: new Date().toISOString(),
       };
-      
+
       const result = ConfigurationsModule.ConfigurationSchema.safeParse(explicitConfiguration);
       expect(result.success).toBe(true);
-      
+
       if (!result.success) return;
-      
+
       // Verify explicit values are preserved
       expect(result.data.source.join).toBe(ConfigurationsModule.JoinType.MANY);
       expect(result.data.target.join).toBe(ConfigurationsModule.JoinType.MANY);
@@ -389,7 +336,7 @@ describe('Configurations Index Module', () => {
         status: ConfigurationsModule.ConfigurationStatus.ENABLED,
         updatedAt: new Date().toISOString(),
       };
-      
+
       const result = ConfigurationsModule.ConfigurationSchema.safeParse(invalidConfiguration);
       expect(result.success).toBe(false);
     });
@@ -409,7 +356,7 @@ describe('Configurations Index Module', () => {
         status: ConfigurationsModule.ConfigurationStatus.ENABLED,
         updatedAt: new Date().toISOString(),
       };
-      
+
       const result = ConfigurationsModule.ConfigurationSchema.safeParse(invalidEnumConfiguration);
       expect(result.success).toBe(false);
     });

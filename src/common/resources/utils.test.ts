@@ -1,5 +1,5 @@
-import { z } from 'zod';
 import { describe, expect, test, vi } from 'vitest';
+import * as z from 'zod/v4';
 import { HttpError } from '../errors/http.js';
 import { ValidationError } from '../errors/validation.js';
 import {

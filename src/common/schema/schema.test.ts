@@ -1,5 +1,5 @@
-import { z } from 'zod';
 import { describe, expect, test } from 'vitest';
+import * as z from 'zod/v4';
 import { optionallyNullish, optionallyNullishToUndefined, optionallyUndefined } from './schema.js';
 
 describe('Common Schema', () => {

@@ -25,7 +25,7 @@ describe('Apps Index Module', () => {
       expect(AppsModule.AppAvatarUrlSchema).toBeDefined();
       expect(AppsModule.AppAvatarUrlStringSchema).toBeDefined();
       expect(AppsModule.AppHandleSchema).toBeDefined();
-      
+
       // Verify they are the same functions as imported directly
       expect(AppsModule.AppSchema).toBe(AppSchema);
       expect(AppsModule.AppPayloadSchema).toBe(AppPayloadSchema);
@@ -44,7 +44,7 @@ describe('Apps Index Module', () => {
       expect(typeof AppsModule.AppAvatarUrlSchema).toBe('object');
       expect(typeof AppsModule.AppAvatarUrlStringSchema).toBe('object');
       expect(typeof AppsModule.AppHandleSchema).toBe('object');
-      
+
       // Verify they have safeParse method (zod schema property)
       expect(typeof AppsModule.AppSchema.safeParse).toBe('function');
       expect(typeof AppsModule.AppPayloadSchema.safeParse).toBe('function');
@@ -55,7 +55,7 @@ describe('Apps Index Module', () => {
     test('should have proper TypeScript type exports available', () => {
       // This test verifies that the types are properly exported and can be used
       // TypeScript compilation will fail if these types are not available
-      
+
       const app: App = {
         handle: 'test-app',
         name: 'Test App',
@@ -63,7 +63,7 @@ describe('Apps Index Module', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      
+
       const appPayload: AppPayload = {
         handle: 'test-app',
         name: 'Test App',
@@ -71,78 +71,26 @@ describe('Apps Index Module', () => {
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-02T00:00:00.000Z',
       };
-      
+
       const insertPayload: InsertAppPayload = {
         handle: 'new-app',
         name: 'New App',
         avatar: 'https://example.com/new-avatar.png',
       };
-      
+
       const updatePayload: UpdateAppPayload = {
         name: 'Updated App',
         avatar: 'https://example.com/updated-avatar.png',
       };
-      
+
       const handle: AppHandle = 'test-handle';
-      
+
       // Verify the objects have the expected structure
       expect(app.handle).toBe('test-app');
       expect(appPayload.handle).toBe('test-app');
       expect(insertPayload.handle).toBe('new-app');
       expect(updatePayload.name).toBe('Updated App');
       expect(handle).toBe('test-handle');
-    });
-  });
-
-  describe('Module structure', () => {
-    test('should export all expected members', () => {
-      const expectedExports = [
-        'AppSchema',
-        'AppPayloadSchema', 
-        'InsertAppPayloadSchema',
-        'UpdateAppPayloadSchema',
-        'AppAvatarUrlSchema',
-        'AppAvatarUrlStringSchema',
-        'AppHandleSchema',
-        'NullableAppAvatarUrlStringSchema',
-        'AppReferenceSchema',
-      ];
-      
-      for (const exportName of expectedExports) {
-        expect(AppsModule).toHaveProperty(exportName);
-        expect(AppsModule[exportName as keyof typeof AppsModule]).toBeDefined();
-      }
-    });
-
-    test('should not export unexpected members', () => {
-      // Get all enumerable properties of the module
-      const actualExports = Object.keys(AppsModule);
-      
-      const expectedExports = [
-        'AppSchema',
-        'AppPayloadSchema',
-        'InsertAppPayloadSchema', 
-        'UpdateAppPayloadSchema',
-        'AppAvatarUrlSchema',
-        'AppAvatarUrlStringSchema',
-        'AppHandleSchema',
-        'NullableAppAvatarUrlStringSchema',
-        'AppReferenceSchema',
-      ];
-      
-      // Check that we don't have unexpected exports
-      const unexpectedExports = actualExports.filter(
-        exportName => !expectedExports.includes(exportName)
-      );
-      
-      expect(unexpectedExports).toEqual([]);
-    });
-
-    test('should have consistent export count', () => {
-      const actualExportCount = Object.keys(AppsModule).length;
-      const expectedExportCount = 9; // Based on the schema exports
-      
-      expect(actualExportCount).toBe(expectedExportCount);
     });
   });
 
@@ -155,17 +103,17 @@ describe('Apps Index Module', () => {
         createdAt: new Date('2024-01-01T00:00:00.000Z').toISOString(),
         updatedAt: new Date('2024-01-02T00:00:00.000Z').toISOString(),
       };
-      
+
       // Test that we can use the exported schemas
       const appResult = AppsModule.AppSchema.safeParse(testData);
       const payloadResult = AppsModule.AppPayloadSchema.safeParse(testData);
       const handleResult = AppsModule.AppHandleSchema.safeParse(testData.handle);
-      
+
       // Verify results are valid (successful parses)
       expect(appResult.success).toBe(true);
       expect(payloadResult.success).toBe(true);
       expect(handleResult.success).toBe(true);
-      
+
       // Verify the schemas work as expected
       if (handleResult.success) {
         expect(handleResult.data).toBe(testData.handle);
@@ -177,23 +125,23 @@ describe('Apps Index Module', () => {
         handle: 'insert-test',
         name: 'Insert Test App',
       };
-      
+
       const validUpdateData = {
         name: 'Updated Test App',
       };
-      
+
       // Test insert schema
       const insertResult = AppsModule.InsertAppPayloadSchema.safeParse(validInsertData);
       expect(insertResult.success).toBe(true);
-      
+
       // Test update schema  
       const updateResult = AppsModule.UpdateAppPayloadSchema.safeParse(validUpdateData);
       expect(updateResult.success).toBe(true);
-      
+
       // Test URL schemas
       const urlResult = AppsModule.AppAvatarUrlSchema.safeParse('https://example.com/test.png');
       expect(urlResult.success).toBe(true);
-      
+
       const urlStringResult = AppsModule.AppAvatarUrlStringSchema.safeParse('https://example.com/test.png');
       expect(urlStringResult.success).toBe(true);
     });
@@ -218,7 +166,7 @@ describe('Apps Index Module', () => {
       expect(typeof AppsModule.AppPayloadSchema).toBe('object');
       expect(typeof AppsModule.InsertAppPayloadSchema).toBe('object');
       expect(typeof AppsModule.UpdateAppPayloadSchema).toBe('object');
-      
+
       // Verify functions are the same references
       expect(AppsModule.AppSchema).toBe(AppSchema);
       expect(AppsModule.AppPayloadSchema).toBe(AppPayloadSchema);

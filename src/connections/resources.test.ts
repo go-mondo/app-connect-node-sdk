@@ -618,7 +618,7 @@ describe('Connections Resources', () => {
       ];
 
       for (const operation of operations) {
-        if (operation.toString().includes('listItemsBySource')) {
+        if (operation.toString().includes('listItems')) {
           mockFetch.mockResolvedValueOnce(MockHelpers.createMockResponse(MockHelpers.createPaginatedResponse([])));
         } else {
           mockFetch.mockResolvedValueOnce(MockHelpers.createMockResponse(validConnection));

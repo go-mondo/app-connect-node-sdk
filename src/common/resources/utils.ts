@@ -1,4 +1,4 @@
-import type { z } from "zod";
+import type { z } from "zod/v4";
 import { HttpError } from "../errors/http.js";
 import { ValidationError } from "../errors/validation.js";
 import type { Pagination } from "../schema/pagination.js";

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod/v4";
 import { AppHandleSchema, AppSchema } from "../apps/schema.js";
 import { RequiredDateSchema } from "../common/index.js";
 import { AppObjectHandleSchema, AppObjectSchema } from "../objects/schema.js";

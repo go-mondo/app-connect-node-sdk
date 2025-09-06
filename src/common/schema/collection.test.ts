@@ -1,5 +1,5 @@
-import { z } from 'zod';
 import { describe, expect, test } from 'vitest';
+import * as z from 'zod/v4';
 import { CollectionSchema, PaginationCollectionSchema } from './collection.js';
 
 describe('Common Schema - Collection', () => {

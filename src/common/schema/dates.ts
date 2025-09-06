@@ -1,12 +1,9 @@
-import { z } from "zod";
+import * as z from "zod/v4";
 
 // Normalizing to a Date object
 export const RequiredDateSchema = z.union([
 	z.date(),
-	z
-		.string()
-		.datetime()
-		.transform((str) => new Date(str)),
+	z.iso.datetime().transform((str) => new Date(str)),
 ]);
 export const OptionalDateSchema = RequiredDateSchema.optional();
 

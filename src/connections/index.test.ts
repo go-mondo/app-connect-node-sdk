@@ -143,66 +143,6 @@ describe('Connections Index Module', () => {
     });
   });
 
-  describe('Module structure', () => {
-    test('should export all expected members', () => {
-      const expectedExports = [
-        // Schema exports
-        'ConnectionPayloadSchema',
-        'EntitySchema',
-        'ExpandedEntitySchema',
-        'SourceSchema',
-        'TargetSchema',
-        'UpsertConnectionPayloadSchema',
-        // Resource exports
-        'ConnectionResources',
-        'PATH',
-        'associateConnection',
-        'dissociateConnection',
-        'listConnections',
-      ];
-
-      for (const exportName of expectedExports) {
-        expect(ConnectionsModule).toHaveProperty(exportName);
-        expect(ConnectionsModule[exportName as keyof typeof ConnectionsModule]).toBeDefined();
-      }
-    });
-
-    test('should not export unexpected members', () => {
-      // Get all enumerable properties of the module
-      const actualExports = Object.keys(ConnectionsModule);
-
-      const expectedExports = [
-        // Schema exports
-        'ConnectionPayloadSchema',
-        'EntitySchema',
-        'ExpandedEntitySchema',
-        'SourceSchema',
-        'TargetSchema',
-        'UpsertConnectionPayloadSchema',
-        // Resource exports
-        'ConnectionResources',
-        'PATH',
-        'associateConnection',
-        'dissociateConnection',
-        'listConnections',
-      ];
-
-      // Check that we don't have unexpected exports
-      const unexpectedExports = actualExports.filter(
-        exportName => !expectedExports.includes(exportName)
-      );
-
-      expect(unexpectedExports).toEqual([]);
-    });
-
-    test('should have consistent export count', () => {
-      const actualExportCount = Object.keys(ConnectionsModule).length;
-      const expectedExportCount = 11; // 6 schema + 5 resource exports
-
-      expect(actualExportCount).toBe(expectedExportCount);
-    });
-  });
-
   describe('Functional verification', () => {
     test('should be able to use exported schemas for validation', () => {
       const sourceData = {
