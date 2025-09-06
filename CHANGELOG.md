@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.1-beta.14](https://github.com/go-mondo/app-connect-node-sdk/compare/app-connect-sdk-v0.0.1-beta.13...app-connect-sdk-v0.0.1-beta.14) (2025-09-06)
+
+
+### Bug Fixes
+
+* set zod package / tests ([244dca2](https://github.com/go-mondo/app-connect-node-sdk/commit/244dca27bbeeff33556b4881a8171e17f333c805))
+
 ## [0.0.1-beta.13](https://github.com/go-mondo/app-connect-node-sdk/compare/app-connect-sdk-v0.0.1-beta.12...app-connect-sdk-v0.0.1-beta.13) (2025-08-21)
 
 
